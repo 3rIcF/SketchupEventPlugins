@@ -1,4 +1,3 @@
-\
     # Elementaro AutoInfo v2.3.0 — performance & UX
     # - Iterativer Scan (kein Rekursionslimit)
     # - Scan-/Filter-Cache
@@ -84,7 +83,7 @@
         end
 
         @dlg.add_action_callback('requestData') do |_c, payload|
-          opts = default_opts.merge(JSON.parse(payload.to_s) rescue {})
+          opts = default_opts.merge((JSON.parse(payload.to_s) rescue {}))
           send_rows(scan_with_cache(opts))
           send_defs_summary
         end
