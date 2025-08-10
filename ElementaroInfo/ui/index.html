@@ -67,17 +67,17 @@
     </aside>
 
     <main class="ea-main">
-      <div class="ea-tabs">
-        <div class="tab active" data-tab="list">Liste</div>
-        <div class="tab" data-tab="cards">Karten/Library</div>
-        <div class="tab" data-tab="catalog">Katalog (alle Definitionen)</div>
+      <div class="ea-tabs" role="tablist">
+        <button class="tab active" data-tab="list" id="tab-list" role="tab" aria-controls="listView" aria-selected="true" tabindex="0">Liste</button>
+        <button class="tab" data-tab="cards" id="tab-cards" role="tab" aria-controls="cardsView" aria-selected="false" tabindex="-1">Karten/Library</button>
+        <button class="tab" data-tab="catalog" id="tab-catalog" role="tab" aria-controls="catalogView" aria-selected="false" tabindex="-1">Katalog (alle Definitionen)</button>
       </div>
 
       <div class="ea-view">
         <div id="loading" class="ea-loading"><div class="box">Bitte warten…</div></div>
 
         <!-- LIST -->
-        <div id="listView" class="view">
+        <div id="listView" class="view" role="tabpanel" aria-labelledby="tab-list">
           <div id="listWrap">
             <table>
               <thead><tr id="thead"></tr></thead>
@@ -88,7 +88,7 @@
         </div>
 
         <!-- CARDS + INSPECTOR -->
-        <div id="cardsView" class="view" style="display:none">
+        <div id="cardsView" class="view" style="display:none" role="tabpanel" aria-labelledby="tab-cards">
           <div id="cards"></div>
           <aside id="inspector">
             <h3>Inspector</h3>
@@ -98,7 +98,7 @@
         </div>
 
         <!-- CATALOG: alle Definitionen -->
-        <div id="catalogView" class="view" style="display:none">
+        <div id="catalogView" class="view" style="display:none" role="tabpanel" aria-labelledby="tab-catalog">
           <div id="catalog"></div>
         </div>
       </div>
