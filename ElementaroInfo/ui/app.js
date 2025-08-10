@@ -188,17 +188,36 @@
     $('#decimals').onchange = (e)=>{ decimals=parseInt(e.target.value||2,10); localStorage.setItem('EA_DECIMALS', String(decimals)); render(); };
     $('#countMode').onchange = render;
 
-    document.querySelectorAll('.tab').forEach(t=>{
-      t.onclick=()=>{
-        document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-        t.classList.add('active');
-        const tab=t.dataset.tab;
-        $('#listView').style.display = tab==='list' ? '' : 'none';
-        $('#cardsView').style.display = tab==='cards'? '' : 'none';
-        $('#catalogView').style.display = tab==='catalog'? '' : 'none';
-        if(tab==='catalog') drawCatalog();
-      };
+    const tabs = Array.from(document.querySelectorAll('.ea-tabs .tab'));
+    function activateTab(t){
+      tabs.forEach(x=>{
+        const active = x===t;
+        x.classList.toggle('active', active);
+        x.setAttribute('aria-selected', active? 'true':'false');
+        x.setAttribute('tabindex', active? '0':'-1');
+        const view=document.getElementById(x.getAttribute('aria-controls'));
+        if(view) view.style.display = active? '' : 'none';
+      });
+      if(t.dataset.tab==='catalog') drawCatalog();
+    }
+    tabs.forEach(t=>{
+      t.addEventListener('click', ()=>activateTab(t));
+      t.addEventListener('keydown', e=>{
+        if(e.key==='ArrowRight' || e.key==='ArrowLeft'){
+          e.preventDefault();
+          const dir = e.key==='ArrowRight'?1:-1;
+          let idx = tabs.indexOf(t) + dir;
+          if(idx<0) idx = tabs.length-1;
+          if(idx>=tabs.length) idx = 0;
+          tabs[idx].focus();
+          activateTab(tabs[idx]);
+        } else if(e.key==='Enter'){
+          e.preventDefault();
+          activateTab(t);
+        }
+      });
     });
+    activateTab(document.querySelector('.ea-tabs .tab.active') || tabs[0]);
 
     (function init(){
       $('#attrKeys').value = loadLS('EA_ATTRS', 'sku,variant,unit,price_eur,owner,supplier,article_number,description');
