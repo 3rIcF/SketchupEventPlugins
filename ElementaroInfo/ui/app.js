@@ -34,11 +34,7 @@
 
     let allRows=[], rowsVersion=0;
     let defsCatalog=[];
-<<<<<<< HEAD
-    let currentVis=[];
-=======
     let childMap = new Map();
->>>>>>> origin/codex/update-childmap-functionality-in-app.js
 
     let filterCacheKey = '';
     let cachedVisible = [];
