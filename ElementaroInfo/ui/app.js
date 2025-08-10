@@ -320,12 +320,16 @@
       const vis = visibleRows();
       currentVis = vis;
 
-      const defs=new Set(vis.map(r=>r.definition_name).filter(Boolean));
-      const types=new Set(vis.map(r=>r.entity_kind));
-      const sumPrice = [...defs].reduce((acc,d)=>{
-        const rr = vis.find(x=>x.definition_name===d);
-        return acc + Number(rr?.def_total_price_eur||0);
-      },0);
+      const defs=new Map();
+      const types=new Set();
+      vis.forEach(r=>{
+        types.add(r.entity_kind);
+        const d=r.definition_name;
+        if(d && !defs.has(d)){
+          defs.set(d, Number(r.def_total_price_eur||0));
+        }
+      });
+      const sumPrice=[...defs.values()].reduce((acc,v)=>acc+v,0);
       $('#kpiCount').textContent = `Zeilen: ${vis.length.toLocaleString()}`;
       $('#kpiTypes').textContent = `Entitäten: ${[...types].join(', ')||'-'}`;
       $('#kpiDefs').textContent  = `Definitionen: ${defs.size.toLocaleString()}`;
