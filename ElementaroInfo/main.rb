@@ -593,6 +593,8 @@
       # ---------------- Menü ----------------
       unless defined?($ea_menu_added) && $ea_menu_added
         $ea_menu_added = true
-        (UI.menu('Extensions') rescue UI.menu('Plugins')).add_submenu('Elementaro').add_item('AutoInfo (Panel)'){ ElementaroInfo.show_panel }
+        (UI.menu('Extensions') rescue UI.menu('Plugins'))
+          .add_submenu('Elementaro')
+          .add_item('AutoInfo (Panel)'){ ElementaroInfo.show_panel }
       end
     end
