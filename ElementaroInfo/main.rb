@@ -1,5 +1,4 @@
-\
-    # Elementaro AutoInfo v2.3.0 — performance & UX
+# Elementaro AutoInfo v2.3.0 — performance & UX
     # - Iterativer Scan (kein Rekursionslimit)
     # - Scan-/Filter-Cache
     # - Katalog-Ansicht (alle Definitionen)
@@ -83,11 +82,11 @@
           send_defs_summary # Katalog füttern
         end
 
-        @dlg.add_action_callback('requestData') do |_c, payload|
-          opts = default_opts.merge(JSON.parse(payload.to_s) rescue {})
-          send_rows(scan_with_cache(opts))
-          send_defs_summary
-        end
+          @dlg.add_action_callback('requestData') do |_c, payload|
+            opts = default_opts.merge((JSON.parse(payload.to_s) rescue {}))
+            send_rows(scan_with_cache(opts))
+            send_defs_summary
+          end
 
         @dlg.add_action_callback('exportCsv'){ |_c, rows| export_rows(rows, :csv) }
         @dlg.add_action_callback('exportJson'){ |_c, rows| export_rows(rows, :json) }
