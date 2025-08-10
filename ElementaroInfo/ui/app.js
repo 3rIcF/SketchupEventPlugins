@@ -1,4 +1,3 @@
-\
     // Elementaro AutoInfo UI (app.js)
 
     const SUI = window.sketchup || {};
@@ -16,6 +15,7 @@
     function loadJSON(k, def){ try{ return JSON.parse(localStorage.getItem(k)||JSON.stringify(def)); }catch(_){ return def; } }
     function saveJSON(k, v){ localStorage.setItem(k, JSON.stringify(v)); }
     function loadLS(k, def){ const v = localStorage.getItem(k); return v==null? def : v; }
+    function debounce(fn, delay){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), delay); }; }
 
     function loadCols(){
       const saved = loadJSON('EA_COLS', null);
@@ -34,6 +34,7 @@
 
     let allRows=[], rowsVersion=0;
     let defsCatalog=[];
+    let currentVis=[];
 
     let filterCacheKey = '';
     let cachedVisible = [];
@@ -168,7 +169,8 @@
     $('#btnThumbsClear').onclick   = ()=> SUI.clearThumbCache && SUI.clearThumbCache();
     $('#btnRestoreTags').onclick   = ()=> SUI.restoreTags && SUI.restoreTags();
 
-    $('#q').oninput = ()=>{ render(); refreshChips(); saveFilters(); };
+    const handleSearchInput = debounce(()=>{ render(); refreshChips(); saveFilters(); }, 200);
+    $('#q').oninput = handleSearchInput;
     $('#onlyPinned').onchange = ()=>{ render(); refreshChips(); saveFilters(); };
     $('#fType').onchange = ()=>{ render(); refreshChips(); saveFilters(); };
     $('#fTag').onchange  = ()=>{ render(); refreshChips(); saveFilters(); };
@@ -294,15 +296,14 @@
       return out;
     }
 
-    let cachedVisible = []; let filterCacheKey = '';
     function visibleRows(){
-      const key = filterKey();
-      if(key !== filterCacheKey){
-        cachedVisible = computeVisible();
-        filterCacheKey = key;
+        const key = filterKey();
+        if(key !== filterCacheKey){
+          cachedVisible = computeVisible();
+          filterCacheKey = key;
+        }
+        return cachedVisible;
       }
-      return cachedVisible;
-    }
 
     const listWrap=$('#listWrap'), tbody=$('#tbody'), spacer=$('#spacer');
     listWrap.addEventListener('scroll', drawWindow);
@@ -310,6 +311,7 @@
     function render(){
       refreshChips();
       const vis = visibleRows();
+      currentVis = vis;
 
       const defs=new Set(vis.map(r=>r.definition_name).filter(Boolean));
       const types=new Set(vis.map(r=>r.entity_kind));
@@ -341,7 +343,7 @@
     }
 
     function drawWindow(){
-      const vis = visibleRows().filter(isVisibleByExpand);
+      const vis = currentVis.filter(isVisibleByExpand);
       const scrollTop=listWrap.scrollTop, height=listWrap.clientHeight;
       const start=Math.max(0, Math.floor(scrollTop/rowHeight)-buffer);
       const end=Math.min(vis.length, Math.ceil((scrollTop+height)/rowHeight)+buffer);
@@ -419,7 +421,7 @@
         return m;
       })();
       menu.style.left=x+'px'; menu.style.top=y+'px'; menu.style.display='block';
-      const r = visibleRows().filter(isVisibleByExpand)[parseInt(tr.dataset.index,10)];
+        const r = currentVis.filter(isVisibleByExpand)[parseInt(tr.dataset.index,10)];
 
       menu.querySelectorAll('button').forEach(btn=>{
         btn.onclick = ()=>{
@@ -439,7 +441,7 @@
     function drawCards(){
       if($('#cardsView').style.display==='none'){ $('#cards').innerHTML=''; return; }
       const cards=$('#cards'); cards.innerHTML='';
-      const map={}; visibleRows().forEach(r=>{ if(!excludedDefs.has(r.definition_name)) map[r.definition_name]=r; });
+        const map={}; currentVis.forEach(r=>{ if(!excludedDefs.has(r.definition_name)) map[r.definition_name]=r; });
       Object.values(map).forEach(r=>{
         const d=document.createElement('div'); d.className='card';
         const img=document.createElement('img'); if(r.thumb) img.src=r.thumb;
@@ -540,7 +542,7 @@
     function toggleExclude(def){ if(excludedDefs.has(def)) excludedDefs.delete(def); else excludedDefs.add(def); saveJSON('EA_EXCLUDED', [...excludedDefs]); refreshChips(); renderTray(); render(); }
 
     function uniqueDefs(){ const rows=currentVisibleRows(); return [...new Set(rows.map(r=>r.definition_name).filter(Boolean))]; }
-    function currentVisibleRows(){ return visibleRows().filter(isVisibleByExpand); }
+    function currentVisibleRows(){ return currentVis.filter(isVisibleByExpand); }
 
     function toggleLoading(on, txt){
       const el=$('#loading'); el.style.display=on?'flex':'none';
