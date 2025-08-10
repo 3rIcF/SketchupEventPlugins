@@ -390,8 +390,8 @@
           path      = (chain + [display]).join(' / ')
           parent    = chain.last || ''
 
-          attrs = read_attrs(e)
-          attrs.merge!(read_attrs(defn)) if defn
+          attrs = defn ? read_attrs(defn) : {}
+          attrs.merge!(read_attrs(e))
           picked = pick(attrs, (opts['attr_keys']||[]))
           price  = (picked['price_eur']||0).to_f
 
