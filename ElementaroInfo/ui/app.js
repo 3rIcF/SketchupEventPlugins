@@ -305,7 +305,14 @@
     }
 
     const listWrap=$('#listWrap'), tbody=$('#tbody'), spacer=$('#spacer');
-    listWrap.addEventListener('scroll', drawWindow);
+    let scrollRAF=null;
+    listWrap.addEventListener('scroll', ()=>{
+      if(scrollRAF) return;
+      scrollRAF = requestAnimationFrame(()=>{
+        scrollRAF=null;
+        drawWindow();
+      });
+    });
 
     function render(){
       refreshChips();
