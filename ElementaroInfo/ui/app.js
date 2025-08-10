@@ -252,14 +252,16 @@
     }
 
     function filterKey(){
+      const follow = $('#followSel').checked;
+      const selKey = follow ? [...selectedPids].sort().join(',') : '';
       return JSON.stringify({
         q: $('#q').value || '',
         type: $('#fType').value || '',
         tag: $('#fTag').value || '',
         incomplete: $('#fIncomplete').checked,
         onlyPinned: $('#onlyPinned').checked,
-        followSel: $('#followSel').checked,
-        selSize: $('#followSel').checked ? selectedPids.size : 0,
+        followSel: follow,
+        selKey,
         excluded: [...excludedDefs].sort(),
         pinned:   [...pinnedDefs].sort(),
         rowsVer: rowsVersion
