@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Elementaro AutoInfo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="ea-header">
+    <div class="title">Elementaro AutoInfo</div>
+    <div class="right">
+      <button class="primary" id="btnScan">Jetzt scannen</button>
+      <button id="btnColumns">Spalten</button>
+      <button id="btnExportCsv">CSV</button>
+      <button id="btnExportJson">JSON</button>
+      <button id="btnExportZip">ZIP</button>
+    </div>
+  </header>
+
+  <div class="ea-bar">
+    <input id="q" type="text" placeholder="Suche …" size="40" aria-label="Suche">
+    <label style="margin-left:auto;">Nur Merkliste <input type="checkbox" id="onlyPinned"></label>
+    <button id="btnCollapseAll">Alle ▸</button>
+    <button id="btnExpandAll">Alle ▾</button>
+    <button id="btnThumbsMissing">Thumbs fehlend</button>
+    <button id="btnThumbsAll">Thumbs alle</button>
+    <button id="btnThumbsClear">Cache leeren</button>
+    <button id="btnRestoreTags">Tags zurück</button>
+  </div>
+
+  <div id="chips" class="ea-chips"></div>
+
+  <div class="ea-panel">
+    <aside class="ea-side">
+      <div class="section">
+        <div class="sec-title">Filter</div>
+        <label>Entität
+          <select id="fType"><option value="">alle</option><option>Component</option><option>Subcomponent</option><option>Group</option></select>
+        </label>
+        <label>Tag
+          <select id="fTag"><option value="">alle</option></select>
+        </label>
+        <label><input type="checkbox" id="fIncomplete"> nur unvollständige (Preis/Owner/Tag)</label>
+        <label><input type="checkbox" id="followSel"> Selektion folgen</label>
+      </div>
+      <div class="section">
+        <div class="sec-title">Scan-Optionen</div>
+        <label><input type="checkbox" id="selOnly"> nur Auswahl</label>
+        <label><input type="checkbox" id="inclHidden"> versteckte einschließen</label>
+        <label><input type="checkbox" id="onlyVisibleTags"> nur sichtbare Tags</label>
+        <label>Nur
+          <select id="onlyTypes"><option value="both">Gruppen & Komponenten</option><option value="components">nur Komponenten</option><option value="groups">nur Gruppen</option></select>
+        </label>
+        <label>Max Tiefe <input type="range" id="maxDepth" min="1" max="50" value="20"><span id="maxDepthVal">20</span></label>
+      </div>
+      <div class="section">
+        <div class="sec-title">Attribute & Anzeige</div>
+        <label>Attribute (CSV):<br><input type="text" id="attrKeys" style="width:100%"></label>
+        <label>Dezimalstellen <input type="number" id="decimals" min="0" max="6" style="width:60px"></label>
+        <label>Zählweise
+          <select id="countMode"><option value="instances">Instanzen</option><option value="definitions">Definitionen</option></select>
+        </label>
+      </div>
+      <div class="section small muted">
+        Rechtsklick auf Zeile → Kopieren, Auswählen, Zoomen, Tag isolieren, Export nur diese, Ausblenden.
+      </div>
+    </aside>
+
+    <main class="ea-main">
+      <div class="ea-tabs">
+        <div class="tab active" data-tab="list">Liste</div>
+        <div class="tab" data-tab="cards">Karten/Library</div>
+        <div class="tab" data-tab="catalog">Katalog (alle Definitionen)</div>
+      </div>
+
+      <div class="ea-view">
+        <div id="loading" class="ea-loading"><div class="box">Bitte warten…</div></div>
+
+        <!-- LIST -->
+        <div id="listView" class="view">
+          <div id="listWrap">
+            <table>
+              <thead><tr id="thead"></tr></thead>
+              <tbody id="tbody"></tbody>
+            </table>
+            <div id="spacer"></div>
+          </div>
+        </div>
+
+        <!-- CARDS + INSPECTOR -->
+        <div id="cardsView" class="view" style="display:none">
+          <div id="cards"></div>
+          <aside id="inspector">
+            <h3>Inspector</h3>
+            <div class="small muted">Karte (Definition) oder Instanz wählen, um Attribute zu bearbeiten.</div>
+            <div id="inspBody" class="muted" style="margin-top:10px">Keine Auswahl.</div>
+          </aside>
+        </div>
+
+        <!-- CATALOG: alle Definitionen -->
+        <div id="catalogView" class="view" style="display:none">
+          <div id="catalog"></div>
+        </div>
+      </div>
+
+      <div class="ea-kpis">
+        <div class="kpi" id="kpiCount"></div>
+        <div class="kpi" id="kpiTypes"></div>
+        <div class="kpi" id="kpiDefs"></div>
+        <div class="kpi" id="kpiPrice"></div>
+      </div>
+
+      <div class="ea-tray">
+        <h4>Merkliste</h4>
+        <div class="list" id="pinTray"></div>
+        <h4 style="margin-top:10px">Ausgeblendet</h4>
+        <div class="list" id="excludeTray"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Spaltenmenü -->
+  <div id="colsMenu" class="ea-cols-menu" style="display:none">
+    <div class="head">Spalten</div>
+    <div id="colsBody"></div>
+    <div class="foot"><button id="colsClose">OK</button></div>
+  </div>
+
+  <!-- Toasts -->
+  <div id="toasts" class="ea-toasts" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
