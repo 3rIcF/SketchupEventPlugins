@@ -34,7 +34,11 @@
 
     let allRows=[], rowsVersion=0;
     let defsCatalog=[];
+<<<<<<< HEAD
     let currentVis=[];
+=======
+    let childMap = new Map();
+>>>>>>> origin/codex/update-childmap-functionality-in-app.js
 
     let filterCacheKey = '';
     let cachedVisible = [];
@@ -47,6 +51,13 @@
 
     let pinnedDefs  = new Set(loadJSON('EA_PINNED', []));
     let excludedDefs= new Set(loadJSON('EA_EXCLUDED', []));
+
+    function rebuildChildMap(){
+      childMap.clear();
+      allRows.forEach(r => {
+        if(r.parent_key) childMap.set(r.parent_key, true);
+      });
+    }
 
     const $ = sel => document.querySelector(sel);
 
@@ -143,9 +154,9 @@
         const el = document.createElement('div'); el.className='ea-toast'; el.textContent=msg;
         box.appendChild(el); setTimeout(()=>{ el.style.opacity='0'; setTimeout(()=>el.remove(), 300); }, 2200);
       },
-      receiveRows: rows => { allRows = rows||[]; rowsVersion++; afterReceive(); },
-      receiveRowsStart: total => { allRows=[]; },
-      receiveRowsChunk: slice => { allRows = allRows.concat(slice||[]); },
+      receiveRows: rows => { allRows = rows||[]; rebuildChildMap(); rowsVersion++; afterReceive(); },
+      receiveRowsStart: total => { allRows=[]; childMap.clear(); },
+      receiveRowsChunk: slice => { slice = slice||[]; allRows = allRows.concat(slice); slice.forEach(r=>{ if(r.parent_key) childMap.set(r.parent_key, true); }); },
       receiveRowsEnd: ()=> { rowsVersion++; afterReceive(); },
       receiveSelection: pids => { selectedPids = new Set(pids||[]); if($('#followSel').checked) render(); },
       receiveDefinitionAttrs: payload => renderDefEditor(payload),
@@ -396,7 +407,7 @@
             const wrap=document.createElement('div'); wrap.style.display='flex'; wrap.style.alignItems='center'; wrap.style.gap='6px';
             const indent=document.createElement('span'); indent.style.paddingLeft=(6+(parseInt(r.level||0,10)*12))+'px';
             const isExp = expanded.has(r.path);
-            const hasChildren = allRows.some(x=>x.parent_key===r.path);
+            const hasChildren = childMap.has(r.path);
             const btn=document.createElement('span'); btn.style.cursor= hasChildren ? 'pointer' : 'default';
             btn.textContent = hasChildren ? (isExp?'▾':'▸') : '•';
             btn.onclick=(ev)=>{ if(!hasChildren) return; ev.stopPropagation(); toggleExpand(r.path); };
