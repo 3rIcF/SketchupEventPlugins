@@ -50,6 +50,12 @@
         m.selection.add_observer(@sel_obs) rescue nil
       end
 
+      def detach_observers
+        m = Sketchup.active_model
+        m.remove_observer(@model_obs) rescue nil if @model_obs
+        m.selection.remove_observer(@sel_obs) rescue nil if @sel_obs
+      end
+
       # ---------------- Entry ----------------
       def show_panel
         @dlg&.close
@@ -62,6 +68,7 @@
           scrollable: true, resizable: true, width: 1240, height: 860
         )
         wire_callbacks
+        @dlg.set_on_closed { detach_observers }
 
         # UI aus Datei laden
         ui_root = File.join(__dir__, 'ui')
