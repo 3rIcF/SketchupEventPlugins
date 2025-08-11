@@ -234,7 +234,7 @@
         to_js('EA.toast("Starte Thumbnail-Queue …")')
         to_js('EA.thumbProgress(0)')
         batch = 3
-        UI.start_timer(0.03, true) do |timer|
+        timer_id = UI.start_timer(0.03, true) do
           begin
             processed = 0
             while processed < batch && !list.empty?
@@ -249,13 +249,13 @@
             prog = ((done.to_f/total)*100).round
             to_js("EA.thumbProgress(#{prog})")
             if list.empty?
-              timer.stop
+              UI.stop_timer(timer_id)
               send_rows(@cache_rows) # aktualisiere Thumb-URIs
               to_js('EA.thumbsReady()')
             end
           rescue => ex
             warn "[EA] queue timer err: #{ex.message}"
-            timer.stop rescue nil
+            UI.stop_timer(timer_id) rescue nil
             to_js('EA.thumbsReady()')
           end
         end
