@@ -26,33 +26,33 @@ BRANCHES_TO_MERGE=$(git branch -r | grep 'origin/' | grep -v "HEAD" | grep -v "o
 
 if [ -z "$BRANCHES_TO_MERGE" ]; then
   echo "Keine Branches zum Mergen gefunden. Alles ist bereits auf dem neuesten Stand."
-  exit 0
-fi
+    exit 0
+    fi
 
-echo "Folgende Branches werden zusammengeführt: "
-echo "$BRANCHES_TO_MERGE"
-echo ""
+    echo "Folgende Branches werden zusammengeführt: "
+    echo "$BRANCHES_TO_MERGE"
+    echo ""
 
-# 4. Schleife durch jeden Branch und führe ihn zusammen
-for branch in $BRANCHES_TO_MERGE; do
-  echo "--- Starte Merge für Branch: $branch ---"
-  
-  # Führe den Merge durch
-  echo "Führe 'git merge' aus..."
-  git merge --no-ff "origin/$branch" -m "Merge branch '$branch' into $MAIN_BRANCH"
-  
-  # Pushe den zusammengeführten Stand zum Server
-  echo "Pushe die Änderungen nach GitHub..."
-  git push origin $MAIN_BRANCH
-  
-  # Lösche den Branch auf dem Server
-  echo "Lösche den Branch '$branch' auf GitHub..."
-  git push origin --delete "$branch"
-  
-  echo "--- Erfolgreich abgeschlossen für Branch: $branch ---"
-  echo ""
-done
+    # 4. Schleife durch jeden Branch und führe ihn zusammen
+    for branch in $BRANCHES_TO_MERGE; do
+      echo "--- Starte Merge für Branch: $branch ---"
+        
+          # Führe den Merge durch
+            echo "Führe 'git merge' aus..."
+              git merge --no-ff "origin/$branch" -m "Merge branch '$branch' into $MAIN_BRANCH"
+                
+                  # Pushe den zusammengeführten Stand zum Server
+                    echo "Pushe die Änderungen nach GitHub..."
+                      git push origin $MAIN_BRANCH
+                        
+                          # Lösche den Branch auf dem Server
+                            echo "Lösche den Branch '$branch' auf GitHub..."
+                              git push origin --delete "$branch"
+                                
+                                  echo "--- Erfolgreich abgeschlossen für Branch: $branch ---"
+                                    echo ""
+                                    done
 
-echo "*****************************************************"
-echo "Alle Branches wurden erfolgreich zusammengeführt!"
-echo "*****************************************************"
+                                    echo "*****************************************************"
+                                    echo "Alle Branches wurden erfolgreich zusammengeführt!"
+                                    echo "*****************************************************"
