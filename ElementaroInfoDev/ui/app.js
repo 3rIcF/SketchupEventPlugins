@@ -104,10 +104,12 @@
           if(!cb) return;
           if(cb.checked) visibleCols.add(k); else visibleCols.delete(k);
         });
-        saveCols(); buildHeader(); render(); menu.style.display='none';
+        saveCols(); buildHeader(); render(); menu.classList.add('is-hidden');
       };
-      menu.style.display='block';
-      document.addEventListener('click', (ev)=>{ if(!menu.contains(ev.target) && ev.target.id!=='btnColumns'){ menu.style.display='none'; }}, {once:true});
+      menu.classList.remove('is-hidden');
+      document.addEventListener('click', (ev)=>{
+        if(!menu.contains(ev.target) && ev.target.id!=='btnColumns') menu.classList.add('is-hidden');
+      }, {once:true});
     };
 
     function saveCols(){
@@ -203,7 +205,7 @@
         x.setAttribute('aria-selected', active? 'true':'false');
         x.setAttribute('tabindex', active? '0':'-1');
         const view=document.getElementById(x.getAttribute('aria-controls'));
-        if(view) view.style.display = active? '' : 'none';
+        if(view) view.classList.toggle('is-hidden', !active);
       });
       if(t.dataset.tab==='catalog') drawCatalog();
     }
@@ -478,7 +480,7 @@
     }
 
     function drawCards(){
-      if($('#cardsView').style.display==='none'){ $('#cards').innerHTML=''; return; }
+      if($('#cardsView').classList.contains('is-hidden')){ $('#cards').innerHTML=''; return; }
       const cards=$('#cards'); cards.innerHTML='';
         const map={}; currentVis.forEach(r=>{ if(!excludedDefs.has(r.definition_name)) map[r.definition_name]=r; });
       Object.values(map).forEach(r=>{
@@ -549,7 +551,7 @@
     }
 
     function drawCatalog(){
-      if($('#catalogView').style.display==='none') return;
+      if($('#catalogView').classList.contains('is-hidden')) return;
       const wrap=$('#catalog'); wrap.innerHTML='';
       if(!defsCatalog || !defsCatalog.length){ wrap.innerHTML='<div class="small muted">Noch keine Daten – „Jetzt scannen“ klicken.</div>'; return; }
       defsCatalog.forEach(d=>{
