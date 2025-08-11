@@ -1,3 +1,3 @@
-$LOAD_PATH.unshift File.expand_path('../ElementaroInfo', __dir__)
+$LOAD_PATH.unshift File.expand_path('../ElementaroInfoDev', __dir__)
 
 require 'minitest/autorun'

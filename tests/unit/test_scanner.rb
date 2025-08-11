@@ -1,9 +1,9 @@
 require 'minitest/autorun'
-require_relative '../../ElementaroInfo/lib/scanner'
+require_relative '../../ElementaroInfoDev/lib/scanner'
 
 class TestScanner < Minitest::Test
   def test_can_create_scanner_instance
-    scanner = ElementaroInfo::Scanner.new
-    assert_instance_of ElementaroInfo::Scanner, scanner
+    scanner = ElementaroInfoDev::Scanner.new
+    assert_instance_of ElementaroInfoDev::Scanner, scanner
   end
 end

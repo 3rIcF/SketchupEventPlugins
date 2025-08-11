@@ -1,4 +1,4 @@
-module ElementaroInfo
+module ElementaroInfoDev
   class Scanner
     def initialize
     end

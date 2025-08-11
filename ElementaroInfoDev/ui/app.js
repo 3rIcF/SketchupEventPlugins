@@ -1,4 +1,4 @@
-    // Elementaro AutoInfo UI (app.js)
+    // Elementaro AutoInfo Dev UI (app.js)
 
     const SUI = window.sketchup || {};
     if (SUI.web_ready) SUI.web_ready();

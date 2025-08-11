@@ -1,4 +1,4 @@
-    # Elementaro AutoInfo v2.3.0 — performance & UX
+    # Elementaro AutoInfo Dev v2.3.0 — performance & UX
     # - Iterativer Scan (kein Rekursionslimit)
     # - Scan-/Filter-Cache
     # - Katalog-Ansicht (alle Definitionen)
@@ -10,7 +10,7 @@
     require 'csv'
     require 'fileutils'
 
-    module ElementaroInfo
+    module ElementaroInfoDev
       extend self
 
       VERSION         = '2.3.0'.freeze
@@ -18,7 +18,7 @@
       DEFAULT_DEC     = 2
       MAX_DEPTH_HARD  = 50
       CHUNK_SIZE      = 3000
-      THUMB_DIR       = File.join(Sketchup.temp_dir, 'elementaro_thumbs').freeze
+      THUMB_DIR       = File.join(Sketchup.temp_dir, 'elementaro_dev_thumbs').freeze
 
       @dlg          = nil
       @cache_rows   = nil        # Ergebnis des letzten Scans (Detailzeilen)
@@ -30,14 +30,14 @@
 
       # -------- Observers: markiere Änderungen ----------
       class ModelObs < Sketchup::ModelObserver
-        def onTransactionCommit(model); ElementaroInfo.mark_dirty!; end
-        def onEraseEntities(model);     ElementaroInfo.mark_dirty!; end
+        def onTransactionCommit(model); ElementaroInfoDev.mark_dirty!; end
+        def onEraseEntities(model);     ElementaroInfoDev.mark_dirty!; end
       end
       class SelObs < Sketchup::SelectionObserver
-        def onSelectionBulkChange(s); ElementaroInfo.push_selection; end
-        def onSelectionCleared(s);    ElementaroInfo.push_selection; end
-        def onSelectedAdded(s, _);    ElementaroInfo.push_selection; end
-        def onSelectedRemoved(s, _);  ElementaroInfo.push_selection; end
+        def onSelectionBulkChange(s); ElementaroInfoDev.push_selection; end
+        def onSelectionCleared(s);    ElementaroInfoDev.push_selection; end
+        def onSelectedAdded(s, _);    ElementaroInfoDev.push_selection; end
+        def onSelectedRemoved(s, _);  ElementaroInfoDev.push_selection; end
       end
 
       def mark_dirty!; @model_dirty = true; end
@@ -63,8 +63,8 @@
         attach_observers
 
         @dlg = UI::HtmlDialog.new(
-          dialog_title: "Elementaro AutoInfo v#{VERSION}",
-          preferences_key: 'elementaro.autoinfo',
+          dialog_title: "Elementaro AutoInfo Dev v#{VERSION}",
+          preferences_key: 'elementaro.autoinfo_dev',
           scrollable: true, resizable: true, width: 1240, height: 860
         )
         wire_callbacks
@@ -162,8 +162,8 @@
           File.open(path, 'wb'){|f| f.write(JSON.pretty_generate(rows))}
           toast("JSON exportiert: #{File.basename(path)}")
         when :zip
-          target = UI.savepanel('Export ZIP (CSV + Thumbs)', default_export_dir, "elementaro_export_#{ts}.zip"); return unless target
-          tmpdir = File.join(Sketchup.temp_dir, "elementaro_export_#{Process.pid}_#{Time.now.to_i}")
+          target = UI.savepanel('Export ZIP (CSV + Thumbs)', default_export_dir, "elementaro_dev_export_#{ts}.zip"); return unless target
+          tmpdir = File.join(Sketchup.temp_dir, "elementaro_dev_export_#{Process.pid}_#{Time.now.to_i}")
           FileUtils.mkdir_p(tmpdir)
           csv_path = File.join(tmpdir, 'data.csv')
           write_csv(csv_path, rows)
@@ -202,7 +202,7 @@
         m = Sketchup.active_model
         m.path.to_s.empty? ? Dir.home : File.dirname(m.path)
       end
-      def default_filename(ext) = "elementaro_autoinfo_#{ts}.#{ext}"
+      def default_filename(ext) = "elementaro_autoinfo_dev_#{ts}.#{ext}"
       def ts = Time.now.strftime('%Y%m%d_%H%M%S')
 
       def write_csv(path, rows)
@@ -602,6 +602,6 @@
         $ea_menu_added = true
         (UI.menu('Extensions') rescue UI.menu('Plugins'))
           .add_submenu('Elementaro')
-          .add_item('AutoInfo (Panel)'){ ElementaroInfo.show_panel }
+          .add_item('AutoInfo Dev (Panel)'){ ElementaroInfoDev.show_panel }
       end
     end
