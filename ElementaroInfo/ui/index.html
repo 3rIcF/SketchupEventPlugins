@@ -19,7 +19,7 @@
 
   <div class="ea-bar">
     <input id="q" type="text" placeholder="Suche …" size="40" aria-label="Suche">
-    <label style="margin-left:auto;">Nur Merkliste <input type="checkbox" id="onlyPinned"></label>
+    <label class="ea-bar__only-pinned">Nur Merkliste <input type="checkbox" id="onlyPinned"></label>
     <button id="btnCollapseAll">Alle ▸</button>
     <button id="btnExpandAll">Alle ▾</button>
     <button id="btnThumbsMissing">Thumbs fehlend</button>
@@ -55,8 +55,8 @@
       </div>
       <div class="section">
         <div class="sec-title">Attribute & Anzeige</div>
-        <label>Attribute (CSV):<br><input type="text" id="attrKeys" style="width:100%"></label>
-        <label>Dezimalstellen <input type="number" id="decimals" min="0" max="6" style="width:60px"></label>
+        <label>Attribute (CSV):<br><input type="text" id="attrKeys" class="ea-side__attr-keys"></label>
+        <label>Dezimalstellen <input type="number" id="decimals" min="0" max="6" class="ea-side__decimals"></label>
         <label>Zählweise
           <select id="countMode"><option value="instances">Instanzen</option><option value="definitions">Definitionen</option></select>
         </label>
@@ -88,17 +88,17 @@
         </div>
 
         <!-- CARDS + INSPECTOR -->
-        <div id="cardsView" class="view" style="display:none" role="tabpanel" aria-labelledby="tab-cards">
+        <div id="cardsView" class="view is-hidden" role="tabpanel" aria-labelledby="tab-cards">
           <div id="cards"></div>
           <aside id="inspector">
             <h3>Inspector</h3>
             <div class="small muted">Karte (Definition) oder Instanz wählen, um Attribute zu bearbeiten.</div>
-            <div id="inspBody" class="muted" style="margin-top:10px">Keine Auswahl.</div>
+            <div id="inspBody" class="muted insp-body">Keine Auswahl.</div>
           </aside>
         </div>
 
         <!-- CATALOG: alle Definitionen -->
-        <div id="catalogView" class="view" style="display:none" role="tabpanel" aria-labelledby="tab-catalog">
+        <div id="catalogView" class="view is-hidden" role="tabpanel" aria-labelledby="tab-catalog">
           <div id="catalog"></div>
         </div>
       </div>
@@ -113,14 +113,14 @@
       <div class="ea-tray">
         <h4>Merkliste</h4>
         <div class="list" id="pinTray"></div>
-        <h4 style="margin-top:10px">Ausgeblendet</h4>
+        <h4 class="ea-tray__subtitle">Ausgeblendet</h4>
         <div class="list" id="excludeTray"></div>
       </div>
     </main>
   </div>
 
   <!-- Spaltenmenü -->
-  <div id="colsMenu" class="ea-cols-menu" style="display:none">
+  <div id="colsMenu" class="ea-cols-menu is-hidden">
     <div class="head">Spalten</div>
     <div id="colsBody"></div>
     <div class="foot"><button id="colsClose">OK</button></div>
