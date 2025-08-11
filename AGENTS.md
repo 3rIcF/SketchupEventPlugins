@@ -8,7 +8,7 @@ Diese Datei beschreibt Setup, Regeln, Teststrategie und Releaseprozess, damit (a
 
 ## Projektkontext
 
-* **App:** SketchUp-Erweiterung „Elementaro AutoInfo“
+* **App:** SketchUp-Erweiterung „Elementaro AutoInfo Dev“
 * **Ziel:** Modellscan, Tabellen-/Karten-UI, Exportfunktionen, responsive UI in `UI::HtmlDialog`
 * **Referenzumgebung:** Windows 11, SketchUp 2025 (Ruby 3.2.2)
 
@@ -18,7 +18,7 @@ Diese Datei beschreibt Setup, Regeln, Teststrategie und Releaseprozess, damit (a
 
 ```
 / (Root)
-├─ ElementaroInfo/           # Ruby-Code der Erweiterung
+├─ ElementaroInfoDev/        # Ruby-Code der Dev-Erweiterung
 │  ├─ main.rb
 │  ├─ ui/                    # HTML/CSS/JS für HtmlDialog
 │  ├─ lib/                   # Hilfsklassen (Scanning, Caching, Export)
@@ -63,7 +63,7 @@ Diese Datei beschreibt Setup, Regeln, Teststrategie und Releaseprozess, damit (a
 * **Pfad für Dev-Load:**
 
   * `%APPDATA%\SketchUp\SketchUp 2025\SketchUp\Plugins\`
-  * Loader-Datei `elementaro_autoinfo.rb` lädt `ElementaroInfo/main.rb`.
+  * Loader-Datei `elementaro_autoinfo_dev.rb` lädt `ElementaroInfoDev/main.rb`.
 
 ---
 
@@ -73,7 +73,7 @@ Diese Datei beschreibt Setup, Regeln, Teststrategie und Releaseprozess, damit (a
 
   ```bash
   # Ruby
-  ruby tools/build.rb  # erzeugt dist/elementaro_autoinfo.rbz
+  ruby tools/build.rb  # erzeugt dist/elementaro_autoinfo_dev.rbz
   ```
 * **Manuell laden:** SketchUp → Erweiterungs-Manager → „Erweiterung installieren…“ → RBZ.
 * **Dev-Modus:** Dateien direkt im Plugins-Ordner austauschen → SketchUp neu starten.
@@ -133,7 +133,7 @@ Diese Datei beschreibt Setup, Regeln, Teststrategie und Releaseprozess, damit (a
 
 ## Architektur-Notizen (Kurz)
 
-* **`ElementaroInfo::App`** – Einstieg, Dialog-Lifecycle, Observer-Mgmt.
+* **`ElementaroInfoDev::App`** – Einstieg, Dialog-Lifecycle, Observer-Mgmt.
 * **`lib/scanner.rb`** – Traversal, Chunking, Caches.
 * **`lib/exporter.rb`** – CSV/JSON.
 * **`ui/`** – HtmlDialog (responsive Layout, Sticky-Header-Tabelle, Sidebar-Toggle).
@@ -222,8 +222,8 @@ Fix/Feature in einem Satz.
 
 ## Artefakt-Namen
 
-* RBZ: `elementaro_autoinfo-v<version>.rbz`
-* Logs: `elementaro_autoinfo-YYYYMMDD-HHMM.log`
+* RBZ: `elementaro_autoinfo_dev-v<version>.rbz`
+* Logs: `elementaro_autoinfo_dev-YYYYMMDD-HHMM.log`
 
 ---
 
