@@ -27,6 +27,7 @@
       @model_dirty  = true
       @tag_vis_stack = []
       @cancel_scan  = false
+      @scan_timer   = nil
 
       # -------- Observers: markiere Änderungen ----------
       class ModelObs < Sketchup::ModelObserver
@@ -48,6 +49,10 @@
         (@sel_obs   ||= SelObs.new)
         m.add_observer(@model_obs) rescue nil
         m.selection.add_observer(@sel_obs) rescue nil
+      end
+
+      def cancel_scan!
+        @cancel_scan = true
       end
 
       # ---------------- Entry ----------------
@@ -78,15 +83,15 @@
       def wire_callbacks
         @dlg.add_action_callback('web_ready') do |_c, _|
           push_selection
-          send_rows(scan_with_cache(default_opts))
-          send_defs_summary # Katalog füttern
+          scan_async(default_opts)
         end
 
         @dlg.add_action_callback('requestData') do |_c, payload|
           opts = default_opts.merge((JSON.parse(payload.to_s) rescue {}))
-          send_rows(scan_with_cache(opts))
-          send_defs_summary
+          scan_async(opts)
         end
+
+        @dlg.add_action_callback('cancelScan'){ |_c,_| cancel_scan! }
 
         @dlg.add_action_callback('exportCsv'){ |_c, rows| export_rows(rows, :csv) }
         @dlg.add_action_callback('exportJson'){ |_c, rows| export_rows(rows, :json) }
@@ -299,51 +304,126 @@
       end
 
       # ---------------- Scan/Caching (ITERATIV) ----------------
-      def scan_with_cache(opts)
-        # Normalisiere
-        opts = {
+      def normalize_scan_opts(opts)
+        {
           'selection_only'=>!!opts['selection_only'],
           'include_hidden'=>!!opts['include_hidden'],
           'only_types'=>(opts['only_types']||'both'),
           'only_visible_tags'=>!!opts['only_visible_tags'],
           'max_depth'=> [[(opts['max_depth']||20).to_i,0].max, MAX_DEPTH_HARD].min,
-          'attr_keys'=> (opts['attr_keys']||DEFAULT_KEYS).map{|k| k.to_s.strip}.reject(&:empty?),
+          'attr_keys'=> (opts['attr_keys']||DEFAULT_KEYS).map { |k| k.to_s.strip }.reject(&:empty?),
           'decimals'=> (opts['decimals']||DEFAULT_DEC).to_i.clamp(0,6),
           'count_mode'=> (opts['count_mode']||'instances')
         }
+      end
 
+      def scan_async(opts)
+        opts = normalize_scan_opts(opts)
+        @scan_timer&.stop rescue nil
+        @cancel_scan = false
+        m    = Sketchup.active_model
+        base = opts['selection_only'] ? m.selection.to_a : m.entities.to_a
+
+        rows    = []
+        visited = {}
+        stack   = base.reverse.map { |e| [e, [], 0] }
+        processed = 0
+        to_js('EA.scanProgress(0)')
+        @scan_timer = UI.start_timer(0.03, true) do |timer|
+          begin
+            cnt = 0
+            while cnt < CHUNK_SIZE && !stack.empty? && !@cancel_scan
+              e, chain, depth = stack.pop
+              next unless e.is_a?(Sketchup::ComponentInstance) || e.is_a?(Sketchup::Group)
+              next if depth > opts['max_depth']
+              if opts['only_types'] == 'components' && !e.is_a?(Sketchup::ComponentInstance)
+                next
+              end
+              if opts['only_types'] == 'groups' && !e.is_a?(Sketchup::Group)
+                next
+              end
+              unless opts['include_hidden']
+                next if (e.hidden? rescue false)
+                next if !(e.layer.visible? rescue true)
+              end
+              if opts['only_visible_tags']
+                next if !(e.layer.visible? rescue true)
+              end
+              key = "#{e.persistent_id}@#{depth}"
+              next if visited[key]
+              visited[key] = true
+
+              defn = if e.respond_to?(:definition) && e.definition
+                       e.definition
+                     elsif e.respond_to?(:entities) && e.entities.respond_to?(:parent)
+                       e.entities.parent
+                     else
+                       nil
+                     end
+              type      = e.is_a?(Sketchup::Group) ? 'Group' : 'Component'
+              kind      = (type == 'Component' && depth >= 1) ? 'Subcomponent' : (type == 'Group' ? 'Group' : 'Component')
+              def_name  = (defn&.name || '').to_s
+              inst_name = e.name.to_s
+              tag_name  = (e.layer&.name || '').to_s
+              display   = inst_name.empty? ? def_name : inst_name
+              path      = (chain + [display]).join(' / ')
+              parent    = chain.last || ''
+
+              attrs = defn ? read_attrs(defn) : {}
+              attrs.merge!(read_attrs(e))
+              picked = pick(attrs, (opts['attr_keys'] || []))
+              price  = (picked['price_eur'] || 0).to_f
+
+              rows << {
+                entity_type: type,
+                entity_kind: kind,
+                level: depth,
+                path: path,
+                parent_display: parent,
+                definition_name: def_name,
+                instance_name: inst_name,
+                tag: tag_name,
+                price_eur: price,
+                pid: e.persistent_id
+              }.merge(sym_down(picked))
+
+              if defn && defn.respond_to?(:entities)
+                children = defn.entities.to_a
+                children.reverse_each do |child|
+                  stack.push([child, chain + [display], depth + 1])
+                end
+              end
+              processed += 1
+              cnt += 1
+            end
+            total = processed + stack.length
+            prog = total.zero? ? 100 : ((processed.to_f / total) * 100).round
+            to_js("EA.scanProgress(#{prog})")
+            if stack.empty? || @cancel_scan
+              timer.stop
+              unless @cancel_scan
+                finalize_scan(rows, opts)
+                send_rows(@cache_rows)
+                send_defs_summary
+              end
+            end
+          rescue => ex
+            warn "[EA] scan timer err: #{ex.message}"
+            timer.stop rescue nil
+          end
+        end
+      end
+
+      def scan_with_cache(opts)
+        opts = normalize_scan_opts(opts)
         if @cache_rows && @cache_opts == opts && !@model_dirty
           return @cache_rows
         end
-
         rows = scan_iterative(opts)
-        # Aggregation
-        counts_def, counts_deftag = Hash.new(0), Hash.new(0)
-        sum_def, sum_deftag       = Hash.new(0.0), Hash.new(0.0)
-        rows.each do |r|
-          kd  = r[:definition_name]; kdt = [r[:definition_name], r[:tag]]
-          counts_def[kd] += 1; counts_deftag[kdt] += 1
-          price = (r[:price_eur]||0).to_f
-          sum_def[kd] += price; sum_deftag[kdt] += price
-        end
-        rows.each do |r|
-          kd  = r[:definition_name]; kdt = [r[:definition_name], r[:tag]]
-          r[:def_total_qty]       = counts_def[kd]
-          r[:def_tag_qty]         = counts_deftag[kdt]
-          r[:def_total_price_eur] = sum_def[kd].round(opts['decimals'])
-          r[:def_tag_price_eur]   = sum_deftag[kdt].round(opts['decimals'])
-          r[:thumb]               = thumb_uri(r[:definition_name])
-        end
-        assign_tree_ids!(rows)
-        @cache_rows   = rows
-        @cache_opts   = opts
-        @defs_summary = build_defs_summary(rows) # für Katalog
-        @model_dirty  = false
-        rows
+        finalize_scan(rows, opts)
       end
 
       def scan_iterative(opts)
-        @cancel_scan = false
         m    = Sketchup.active_model
         base = opts['selection_only'] ? m.selection.to_a : m.entities.to_a
 
@@ -416,6 +496,31 @@
           end
         end
 
+        rows
+      end
+
+      def finalize_scan(rows, opts)
+        counts_def, counts_deftag = Hash.new(0), Hash.new(0)
+        sum_def, sum_deftag       = Hash.new(0.0), Hash.new(0.0)
+        rows.each do |r|
+          kd  = r[:definition_name]; kdt = [r[:definition_name], r[:tag]]
+          counts_def[kd] += 1; counts_deftag[kdt] += 1
+          price = (r[:price_eur] || 0).to_f
+          sum_def[kd] += price; sum_deftag[kdt] += price
+        end
+        rows.each do |r|
+          kd  = r[:definition_name]; kdt = [r[:definition_name], r[:tag]]
+          r[:def_total_qty]       = counts_def[kd]
+          r[:def_tag_qty]         = counts_deftag[kdt]
+          r[:def_total_price_eur] = sum_def[kd].round(opts['decimals'])
+          r[:def_tag_price_eur]   = sum_deftag[kdt].round(opts['decimals'])
+          r[:thumb]               = thumb_uri(r[:definition_name])
+        end
+        assign_tree_ids!(rows)
+        @cache_rows   = rows
+        @cache_opts   = opts
+        @defs_summary = build_defs_summary(rows) # für Katalog
+        @model_dirty  = false
         rows
       end
 
