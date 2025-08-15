@@ -54,6 +54,7 @@ tbody tr:hover{background:#f9fafb}
 #catalog{padding:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
 .catalog-card{border:1px solid var(--border);border-radius:12px;padding:8px;background:#fff;display:flex;gap:8px;align-items:center}
 .catalog-card img{width:56px;height:56px;object-fit:contain;border:1px solid var(--border);border-radius:8px}
+.catalog-actions{padding:12px}
 
 .ea-cols-menu{position:fixed;right:16px;top:64px;width:260px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:50}
 .ea-cols-menu .head{padding:8px 10px;border-bottom:1px solid var(--border);font-weight:600}

@@ -170,6 +170,7 @@
     $('#btnExportCsv').onclick  = ()=> SUI.exportCsv  && SUI.exportCsv(JSON.stringify(currentVisibleRows()));
     $('#btnExportJson').onclick = ()=> SUI.exportJson && SUI.exportJson(JSON.stringify(currentVisibleRows()));
     $('#btnExportZip').onclick  = ()=> SUI.exportZip  && SUI.exportZip(JSON.stringify(currentVisibleRows()));
+    $('#btnExportCatalogPdf').onclick = ()=> SUI.exportCatalogPdf && SUI.exportCatalogPdf();
 
     $('#btnCollapseAll').onclick = ()=>{ expanded=new Set(); render(); };
     $('#btnExpandAll').onclick   = ()=>{ expanded=new Set(allRows.map(r=>r.path)); render(); };
@@ -558,8 +559,12 @@
         const el=document.createElement('div'); el.className='catalog-card';
         const img=document.createElement('img'); if(d.thumb) img.src=d.thumb;
         const col=document.createElement('div');
+        const price = typeof d.price_eur==='number' ? d.price_eur.toFixed(decimals) : '';
+        const parents = (d.parents||[]).join(' / ');
         col.innerHTML = `<div><strong>${d.definition_name}</strong></div>
-                         <div class="small muted">${Object.keys(d.entity_kinds||{}).join(', ')}</div>
+                         <div class="small">${d.description||''}</div>
+                         <div class="small muted">Preis: ${price}</div>
+                         <div class="small muted">Übergeordnet: ${parents}</div>
                          <div class="small muted">Instanzen: ${d.count_instances}</div>`;
         el.appendChild(img); el.appendChild(col);
         el.onclick=()=> openDefInspector(d.definition_name);

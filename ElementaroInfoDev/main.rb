@@ -9,6 +9,7 @@
     require 'json'
     require 'csv'
     require 'fileutils'
+    require 'set'
 
     module ElementaroInfoDev
       extend self
@@ -99,6 +100,7 @@
         @dlg.add_action_callback('exportCsv'){ |_c, rows| export_rows(rows, :csv) }
         @dlg.add_action_callback('exportJson'){ |_c, rows| export_rows(rows, :json) }
         @dlg.add_action_callback('exportZip'){ |_c, rows| export_rows(rows, :zip) }
+        @dlg.add_action_callback('exportCatalogPdf'){ |_c,_| export_catalog_pdf }
 
         # Thumbnails
         @dlg.add_action_callback('thumbsMissing'){ |_c, defs| queue_thumbs(parse_defs(defs), only_missing: true) }
@@ -197,6 +199,27 @@
         end
       rescue => ex
         UI.messagebox("Export fehlgeschlagen:\\n#{ex.class}: #{ex.message}")
+      end
+
+      def export_catalog_pdf
+        list = @defs_summary || []
+        return if list.empty?
+        path = UI.savepanel('Export Katalog (PDF)', default_export_dir, default_filename('pdf'))
+        return unless path
+        require 'prawn'
+        Prawn::Document.generate(path) do |pdf|
+          list.each do |d|
+            pdf.text d[:definition_name], style: :bold
+            pdf.text(d[:description].to_s) unless d[:description].to_s.empty?
+            pdf.text("Preis: #{d[:price_eur]}") if d[:price_eur]
+            pr = (d[:parents] || []).join(' / ')
+            pdf.text("Übergeordnet: #{pr}") unless pr.empty?
+            tp = thumb_path(d[:definition_name]); pdf.image(tp, width: 80) if !tp.empty? && File.exist?(tp)
+            pdf.move_down 10
+          end
+        end
+        toast("PDF exportiert: #{File.basename(path)}")
+      rescue LoadError; UI.messagebox("'prawn' Gem fehlt – PDF nicht erstellt.")
       end
 
       def default_export_dir
@@ -553,22 +576,29 @@
 
       # -------- Definitions-Katalog (für neue Ansicht) --------
       def build_defs_summary(rows)
-        h = {} # def_name => details
+        h = {}
         rows.each do |r|
-          dn = r[:definition_name]; next if dn.to_s.empty?
+          dn = r[:definition_name]
+          next if dn.to_s.empty?
           ent = (h[dn] ||= {
             definition_name: dn,
-            entity_kinds:    {},
+            entity_kinds: {},
             count_instances: 0,
-            sample_tag:      r[:tag],
-            price_eur:       r[:price_eur] || 0,
-            thumb:           thumb_uri(dn)
+            sample_tag: r[:tag],
+            price_eur: r[:price_eur] || 0,
+            description: r[:description],
+            parents: Set.new,
+            thumb: thumb_uri(dn)
           })
           ent[:entity_kinds][r[:entity_kind]] = true
           ent[:count_instances] += 1
-          ent[:price_eur] = r[:price_eur] if (r[:price_eur]||0) > (ent[:price_eur]||0)
+          ent[:price_eur] = r[:price_eur] if (r[:price_eur] || 0) > (ent[:price_eur] || 0)
+          ent[:description] ||= r[:description] if r[:description]
+          pk = r[:parent_key].to_s
+          ent[:parents] << pk unless pk.empty?
         end
-        h.values.sort_by{|x| x[:definition_name].downcase }
+        h.values.each { |v| v[:parents] = v[:parents].to_a.sort }
+         .sort_by { |x| x[:definition_name].downcase }
       end
 
       def send_defs_summary
