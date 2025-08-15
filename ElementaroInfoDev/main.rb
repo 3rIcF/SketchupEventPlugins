@@ -4,6 +4,9 @@
     # - Katalog-Ansicht (alle Definitionen)
     # - Thumbs: Queue + Cache
     # - UI aus separaten Dateien (ui/index.html, app.js, styles.css)
+    # TODO: Analysemodell und Probleme wie fehlende Preise, Tags oder lose Geometrie melden.
+    # TODO: Export der aktuellen Ansicht inklusive Bilder als PDF und SVG ermöglichen.
+    # TODO: Umschaltbare Live-Synchronisation zwischen Modell und Plugin implementieren.
 
     require 'sketchup.rb'
     require 'json'
