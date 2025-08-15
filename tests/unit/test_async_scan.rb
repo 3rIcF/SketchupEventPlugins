@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 require 'minitest/autorun'
 require 'tmpdir'
-require 'ostruct'
 
-$LOADED_FEATURES << 'sketchup.rb'
+$LOAD_PATH.unshift File.expand_path('../../test/stubs', __dir__)
+require 'sketchup'
 
 # --- Stubs for SketchUp API ---
 module UI
@@ -15,7 +17,7 @@ module UI
 
     def trigger
       return if @stopped
-      @block.call(self)
+      @block.call
       @stopped = true unless @repeat
     end
 
@@ -32,6 +34,10 @@ module UI
     timer = TimerStub.new(repeat, block)
     timer.trigger
     timer
+  end
+
+  def self.stop_timer(timer)
+    timer.stop
   end
 
   class MenuStub
@@ -85,7 +91,7 @@ module Sketchup
   class Model
     attr_reader :entities, :selection, :layers
 
-    def initialize(entities)
+    def initialize(entities = [])
       @entities = Entities.new(entities)
       @selection = Entities.new([])
       @layers = []
@@ -93,11 +99,11 @@ module Sketchup
   end
 
   def self.active_model
-    @model
+    @active_model
   end
 
   def self.active_model=(model)
-    @model = model
+    @active_model = model
   end
 
   def self.temp_dir
@@ -148,38 +154,37 @@ class MockEntity < Sketchup::ComponentInstance
   end
 end
 
-require_relative '../../ElementaroInfo/main'
+require_relative '../../ElementaroInfoDev/main'
 
-ElementaroInfo.singleton_class.class_eval do
+ElementaroInfoDev.singleton_class.class_eval do
   attr_accessor :js_calls
 end
 
-ElementaroInfo.define_singleton_method(:to_js) do |js|
+ElementaroInfoDev.define_singleton_method(:to_js) do |js|
   (self.js_calls ||= []) << js
 end
-ElementaroInfo.define_singleton_method(:send_rows) { |_rows| }
-ElementaroInfo.define_singleton_method(:send_defs_summary) { }
+ElementaroInfoDev.define_singleton_method(:send_rows) { |_rows| }
+ElementaroInfoDev.define_singleton_method(:send_defs_summary) { }
 
 class TestAsyncScan < Minitest::Test
   def setup
-    ElementaroInfo.js_calls = []
-    ElementaroInfo.send(:remove_const, :CHUNK_SIZE)
-    ElementaroInfo.const_set(:CHUNK_SIZE, 2)
+    ElementaroInfoDev.js_calls = []
+    ElementaroInfoDev.send(:remove_const, :CHUNK_SIZE)
+    ElementaroInfoDev.const_set(:CHUNK_SIZE, 2)
     ents = (1..5).map { |i| MockEntity.new(i) }
     Sketchup.active_model = Sketchup::Model.new(ents)
   end
 
   def test_progress_and_cancel
-    ElementaroInfo.scan_async(ElementaroInfo.default_opts)
-    progress = ElementaroInfo.js_calls.grep(/EA\.scanProgress\((\d+)\)/)
+    ElementaroInfoDev.scan_async(ElementaroInfoDev.default_opts)
+    progress = ElementaroInfoDev.js_calls.grep(/EA\.scanProgress\((\d+)\)/)
     refute_empty progress
 
-    ElementaroInfo.cancel_scan!
-    timer = ElementaroInfo.instance_variable_get(:@scan_timer)
-    timer.trigger
+    timer = ElementaroInfoDev.instance_variable_get(:@scan_timer)
+    ElementaroInfoDev.cancel_scan!
     assert timer.stopped?
 
-    last = ElementaroInfo.js_calls.grep(/EA\.scanProgress\((\d+)\)/).last
+    last = ElementaroInfoDev.js_calls.grep(/EA\.scanProgress\((\d+)\)/).last
     value = last[/\d+/].to_i
     assert value < 100
   end

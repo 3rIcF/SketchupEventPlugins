@@ -234,15 +234,17 @@
 
       def queue_thumbs(def_names, only_missing:)
         list = def_names.uniq.compact
-        list.select!{|n| Sketchup.active_model.definitions[n] rescue false}
-        list.select!{|n| thumb_path(n).empty? } if only_missing
-        total = list.length; done = 0
-        return to_js('EA.toast("Keine offenen Thumbnails")') if total == 0
+        list.select! { |n| Sketchup.active_model.definitions[n] rescue false }
+        list.select! { |n| thumb_path(n).empty? } if only_missing
+        total = list.length
+        done = 0
+        return to_js('EA.toast("Keine offenen Thumbnails")') if total.zero?
 
         to_js('EA.toast("Starte Thumbnail-Queue …")')
         to_js('EA.thumbProgress(0)')
         batch = 3
-        UI.start_timer(0.03, true) do |timer|
+        timer_id = nil
+        timer_id = UI.start_timer(0.03, true) do
           begin
             processed = 0
             while processed < batch && !list.empty?
@@ -252,18 +254,19 @@
               rescue => ex
                 warn "[EA] thumb error #{n}: #{ex.message}"
               end
-              done += 1; processed += 1
+              done += 1
+              processed += 1
             end
-            prog = ((done.to_f/total)*100).round
+            prog = ((done.to_f / total) * 100).round
             to_js("EA.thumbProgress(#{prog})")
             if list.empty?
-              timer.stop
+              UI.stop_timer(timer_id)
               send_rows(@cache_rows) # aktualisiere Thumb-URIs
               to_js('EA.thumbsReady()')
             end
           rescue => ex
             warn "[EA] queue timer err: #{ex.message}"
-            timer.stop rescue nil
+            UI.stop_timer(timer_id) rescue nil
             to_js('EA.thumbsReady()')
           end
         end
@@ -322,17 +325,19 @@
 
       def scan_async(opts)
         opts = normalize_scan_opts(opts)
-        @scan_timer&.stop rescue nil
+        UI.stop_timer(@scan_timer) if @scan_timer
+        @scan_timer = nil
         @cancel_scan = false
-        m    = Sketchup.active_model
+        m = Sketchup.active_model
         base = opts['selection_only'] ? m.selection.to_a : m.entities.to_a
 
-        rows    = []
+        rows = []
         visited = {}
-        stack   = base.reverse.map { |e| [e, [], 0] }
+        stack = base.reverse.map { |e| [e, [], 0] }
         processed = 0
         to_js('EA.scanProgress(0)')
-        @scan_timer = UI.start_timer(0.03, true) do |timer|
+        timer_id = nil
+        timer_id = UI.start_timer(0.03, true) do
           begin
             cnt = 0
             while cnt < CHUNK_SIZE && !stack.empty? && !@cancel_scan
@@ -403,7 +408,8 @@
             prog = total.zero? ? 100 : ((processed.to_f / total) * 100).round
             to_js("EA.scanProgress(#{prog})")
             if stack.empty? || @cancel_scan
-              timer.stop
+              UI.stop_timer(timer_id)
+              @scan_timer = nil
               unless @cancel_scan
                 finalize_scan(rows, opts)
                 send_rows(@cache_rows)
@@ -412,8 +418,18 @@
             end
           rescue => ex
             warn "[EA] scan timer err: #{ex.message}"
-            timer.stop rescue nil
+            UI.stop_timer(timer_id) rescue nil
+            @scan_timer = nil
           end
+        end
+        @scan_timer = timer_id
+      end
+
+      def cancel_scan!
+        @cancel_scan = true
+        if @scan_timer
+          UI.stop_timer(@scan_timer)
+          @scan_timer = nil
         end
       end
 
