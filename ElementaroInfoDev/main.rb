@@ -29,6 +29,7 @@
       @tag_vis_stack = []
       @cancel_scan  = false
       @scan_timer   = nil
+      @thumb_timer  = nil
 
       # -------- Observers: markiere Änderungen ----------
       class ModelObs < Sketchup::ModelObserver
@@ -263,15 +264,18 @@
 
       def queue_thumbs(def_names, only_missing:)
         list = def_names.uniq.compact
-        list.select!{|n| Sketchup.active_model.definitions[n] rescue false}
-        list.select!{|n| thumb_path(n).empty? } if only_missing
-        total = list.length; done = 0
+        list.select! { |n| Sketchup.active_model.definitions[n] rescue false }
+        list.select! { |n| thumb_path(n).empty? } if only_missing
+        total = list.length
+        done = 0
         return to_js('EA.toast("Keine offenen Thumbnails")') if total == 0
+
+        @thumb_timer&.stop
 
         to_js('EA.toast("Starte Thumbnail-Queue …")')
         to_js('EA.thumbProgress(0)')
         batch = 3
-        UI.start_timer(0.03, true) do |timer|
+        @thumb_timer = UI.start_timer(0.03, true) do |timer|
           begin
             processed = 0
             while processed < batch && !list.empty?
@@ -281,18 +285,21 @@
               rescue => ex
                 warn "[EA] thumb error #{n}: #{ex.message}"
               end
-              done += 1; processed += 1
+              done += 1
+              processed += 1
             end
-            prog = ((done.to_f/total)*100).round
+            prog = ((done.to_f / total) * 100).round
             to_js("EA.thumbProgress(#{prog})")
             if list.empty?
               timer.stop
+              @thumb_timer = nil
               send_rows(@cache_rows) # aktualisiere Thumb-URIs
               to_js('EA.thumbsReady()')
             end
           rescue => ex
             warn "[EA] queue timer err: #{ex.message}"
             timer.stop rescue nil
+            @thumb_timer = nil
             to_js('EA.thumbsReady()')
           end
         end
