@@ -54,8 +54,14 @@
 
       def detach_observers
         m = Sketchup.active_model
-        m.remove_observer(@model_obs) rescue nil if @model_obs
-        m.selection.remove_observer(@sel_obs) rescue nil if @sel_obs
+        if @model_obs
+          m.remove_observer(@model_obs) rescue nil
+          @model_obs = nil
+        end
+        if @sel_obs
+          m.selection.remove_observer(@sel_obs) rescue nil
+          @sel_obs = nil
+        end
       end
 
       # ---------------- Entry ----------------
@@ -70,7 +76,7 @@
           scrollable: true, resizable: true, width: 1240, height: 860
         )
         wire_callbacks
-        @dlg.set_on_closed { detach_observers }
+        @dlg.set_on_closed { ElementaroInfoDev.detach_observers }
 
         # UI aus Datei laden
         ui_root = File.join(__dir__, 'ui')
