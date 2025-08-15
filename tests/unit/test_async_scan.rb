@@ -1,8 +1,12 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
 require 'minitest/autorun'
 require 'tmpdir'
 require 'ostruct'
 
-$LOADED_FEATURES << 'sketchup.rb'
+$LOAD_PATH.unshift File.expand_path('../stubs', __dir__)
+require 'sketchup'
 
 # --- Stubs for SketchUp API ---
 module UI
@@ -60,50 +64,6 @@ module UI
   end
 end
 
-module Geom
-  Z_AXIS = [0, 0, 1]
-end
-
-module Sketchup
-  class ComponentInstance; end
-  class Group < ComponentInstance; end
-  class ModelObserver; end
-  class SelectionObserver; end
-  class Layer
-    def visible?; true; end
-    def name; ''; end
-  end
-  class Entities
-    def initialize(list)
-      @list = list
-    end
-
-    def to_a
-      @list
-    end
-  end
-  class Model
-    attr_reader :entities, :selection, :layers
-
-    def initialize(entities)
-      @entities = Entities.new(entities)
-      @selection = Entities.new([])
-      @layers = []
-    end
-  end
-
-  def self.active_model
-    @model
-  end
-
-  def self.active_model=(model)
-    @model = model
-  end
-
-  def self.temp_dir
-    Dir.tmpdir
-  end
-end
 
 class MockDefinition
   attr_reader :name, :entities
