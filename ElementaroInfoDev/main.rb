@@ -14,11 +14,11 @@
     module ElementaroInfoDev
       extend self
 
-      VERSION         = '2.3.0'.freeze
+      VERSION         = '2.3.1'.freeze
       DEFAULT_KEYS    = %w[sku variant unit price_eur owner supplier article_number description].freeze
       DEFAULT_DEC     = 2
       MAX_DEPTH_HARD  = 50
-      CHUNK_SIZE      = 3000
+      CHUNK_SIZE      = 1000
       THUMB_DIR       = File.join(Sketchup.temp_dir, 'elementaro_dev_thumbs').freeze
 
       @dlg          = nil
