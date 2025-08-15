@@ -1,4 +1,11 @@
     // Elementaro AutoInfo Dev UI (app.js)
+    // TODO: Implement grid, tile and mindmap views with component thumbnails.
+    // TODO: Support grouping by hierarchy and tags.
+    // TODO: Allow direct editing with optional live sync.
+    // TODO: Provide expand/collapse navigation and selection feedback.
+    // TODO: Add quick search and advanced filter options.
+    // TODO: Integrate problem analysis tab with context-aware navigation.
+    // TODO: Enable export of current view (incl. images) to PDF and SVG.
 
     const SUI = window.sketchup || {};
     if (SUI.web_ready) SUI.web_ready();
