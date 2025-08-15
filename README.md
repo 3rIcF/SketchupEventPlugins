@@ -9,4 +9,4 @@ Lokale Basisprüfungen lassen sich mit folgendem Befehl ausführen:
 ruby tools/smoke.rb
 ```
 
-Das Skript führt RuboCop, alle Unit-Tests, den Build-Prozess sowie ein HTML-Lint für `ElementaroInfoDev/ui` aus. Fehlen benötigte Ordner oder Dateien, bricht es mit einer verständlichen Meldung ab.
+Das Skript führt RuboCop, alle Unit-Tests, den Build-Prozess sowie ein HTML-Lint für `ElementaroInfoDev/ui` aus. Fehlen benötigte Ordner oder Dateien, bricht es mit einer verständlichen Meldung ab. Sind `rubocop` oder `npx` nicht vorhanden, werden die entsprechenden Lints übersprungen.

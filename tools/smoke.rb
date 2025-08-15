@@ -7,7 +7,7 @@ abort('Unit test directory not found: tests/unit') unless Dir.exist?('tests/unit
 abort('UI directory not found: ElementaroInfoDev/ui') unless Dir.exist?('ElementaroInfoDev/ui')
 abort('Build script not found: tools/build.rb') unless File.exist?('tools/build.rb')
 
-TEST_FILES = Dir['tests/unit/*.rb']
+TEST_FILES = Dir['tests/unit/test_*.rb']
 abort('No unit tests found in tests/unit') if TEST_FILES.empty?
 HTML_FILES = Dir['ElementaroInfoDev/ui/*.html']
 abort('No HTML files found in ElementaroInfoDev/ui') if HTML_FILES.empty?
@@ -19,7 +19,11 @@ def run(name, cmd, abort_on_fail: true)
   abort("#{name} failed")
 end
 
-run('rubocop', 'rubocop', abort_on_fail: false)
+if system('command -v rubocop >/dev/null 2>&1')
+  run('rubocop', 'rubocop', abort_on_fail: false)
+else
+  warn('rubocop command not found: skipping Ruby lint')
+end
 
 TEST_FILES.each do |file|
   run(File.basename(file), "ruby -Itests #{file}")
