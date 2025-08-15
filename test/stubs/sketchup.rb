@@ -17,27 +17,21 @@ module Sketchup
     @extensions.clear
   end
 
-  class Model
-    attr_reader :selection, :observers
-
-    def initialize
-      @selection = Selection.new
-      @observers = []
+  class Entities
+    def initialize(list = [])
+      @list = list
     end
 
-    def add_observer(obs)
-      @observers << obs
-    end
-
-    def remove_observer(obs)
-      @observers.delete(obs)
+    def to_a
+      @list
     end
   end
 
-  class Selection
+  class Selection < Entities
     attr_reader :observers
 
-    def initialize
+    def initialize(list = [])
+      super(list)
       @observers = []
     end
 
@@ -50,11 +44,50 @@ module Sketchup
     end
   end
 
+  class Layer
+    attr_accessor :visible
+    attr_reader :name
+
+    def initialize(name = '')
+      @name = name
+      @visible = true
+    end
+
+    def visible?
+      @visible
+    end
+  end
+
+  class Model
+    attr_reader :entities, :selection, :layers, :observers
+
+    def initialize(entities = [])
+      @entities = Entities.new(entities)
+      @selection = Selection.new([])
+      @layers = []
+      @observers = []
+    end
+
+    def add_observer(obs)
+      @observers << obs
+    end
+
+    def remove_observer(obs)
+      @observers.delete(obs)
+    end
+  end
+
+  class ComponentInstance; end
+  class Group < ComponentInstance; end
   class ModelObserver; end
   class SelectionObserver; end
 
   def self.active_model
     @active_model ||= Model.new
+  end
+
+  def self.active_model=(model)
+    @active_model = model
   end
 
   def self.temp_dir

@@ -5,7 +5,7 @@ CHECKS = [
   ['rubocop', 'rubocop'],
   [
     'tests',
-    "ruby -Itests -e \"Dir.glob('tests/unit/**/*_test.rb').sort.each { |f| require f }\""
+    "ruby -Itests -e \"Dir.glob('tests/unit/**/*_test.rb').sort.each { |f| require File.expand_path(f) }\""
   ]
 ].freeze
 
