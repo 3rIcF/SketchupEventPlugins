@@ -14,11 +14,11 @@
     module ElementaroInfoDev
       extend self
 
-      VERSION         = '2.3.0'.freeze
+      VERSION         = '2.3.1'.freeze
       DEFAULT_KEYS    = %w[sku variant unit price_eur owner supplier article_number description].freeze
       DEFAULT_DEC     = 2
       MAX_DEPTH_HARD  = 50
-      CHUNK_SIZE      = 3000
+      CHUNK_SIZE      = 1000
       THUMB_DIR       = File.join(Sketchup.temp_dir, 'elementaro_dev_thumbs').freeze
 
       @dlg          = nil
@@ -54,8 +54,14 @@
 
       def detach_observers
         m = Sketchup.active_model
-        m.remove_observer(@model_obs) rescue nil if @model_obs
-        m.selection.remove_observer(@sel_obs) rescue nil if @sel_obs
+        if @model_obs
+          m.remove_observer(@model_obs) rescue nil
+          @model_obs = nil
+        end
+        if @sel_obs
+          m.selection.remove_observer(@sel_obs) rescue nil
+          @sel_obs = nil
+        end
       end
 
       # ---------------- Entry ----------------
@@ -70,7 +76,7 @@
           scrollable: true, resizable: true, width: 1240, height: 860
         )
         wire_callbacks
-        @dlg.set_on_closed { detach_observers }
+        @dlg.set_on_closed { ElementaroInfoDev.detach_observers }
 
         # UI aus Datei laden
         ui_root = File.join(__dir__, 'ui')
@@ -438,6 +444,11 @@
             timer.stop rescue nil
           end
         end
+      end
+
+      def cancel_scan!
+        @cancel_scan = true
+        @scan_timer&.stop
       end
 
       def scan_with_cache(opts)

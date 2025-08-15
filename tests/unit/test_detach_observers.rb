@@ -48,7 +48,7 @@ module UI
     Menu.new
   end
 end
-require_relative '../../ElementaroInfo/main'
+require_relative '../../ElementaroInfoDev/main'
 
 class TestDetachObservers < Minitest::Test
   def setup
@@ -56,13 +56,13 @@ class TestDetachObservers < Minitest::Test
   end
 
   def test_observers_detached_after_close
-    ElementaroInfo.show_panel
+    ElementaroInfoDev.show_panel
     model = Sketchup.active_model
 
     assert_equal 1, model.observers.length
     assert_equal 1, model.selection.observers.length
 
-    ElementaroInfo.instance_variable_get(:@dlg).close
+    ElementaroInfoDev.instance_variable_get(:@dlg).close
 
     assert_empty model.observers
     assert_empty model.selection.observers
