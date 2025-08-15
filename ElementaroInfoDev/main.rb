@@ -1,25 +1,27 @@
-    # Elementaro AutoInfo Dev v2.3.0 — performance & UX
-    # - Iterativer Scan (kein Rekursionslimit)
-    # - Scan-/Filter-Cache
-    # - Katalog-Ansicht (alle Definitionen)
-    # - Thumbs: Queue + Cache
-    # - UI aus separaten Dateien (ui/index.html, app.js, styles.css)
+# frozen_string_literal: true
+# rubocop:disable all
+# Elementaro AutoInfo Dev v2.3.0 — performance & UX
+# - Iterativer Scan (kein Rekursionslimit)
+# - Scan-/Filter-Cache
+# - Katalog-Ansicht (alle Definitionen)
+# - Thumbs: Queue + Cache
+# - UI aus separaten Dateien (ui/index.html, app.js, styles.css)
 
-    require 'sketchup.rb'
-    require 'json'
-    require 'csv'
-    require 'fileutils'
-    require 'set'
+require 'sketchup.rb'
+require 'json'
+require 'csv'
+require 'fileutils'
+require 'set'
+require_relative 'lib/scanner'
 
-    module ElementaroInfoDev
-      extend self
+module ElementaroInfoDev
+  extend self
 
-      VERSION         = '2.3.0'.freeze
-      DEFAULT_KEYS    = %w[sku variant unit price_eur owner supplier article_number description].freeze
-      DEFAULT_DEC     = 2
-      MAX_DEPTH_HARD  = 50
-      CHUNK_SIZE      = 3000
-      THUMB_DIR       = File.join(Sketchup.temp_dir, 'elementaro_dev_thumbs').freeze
+  VERSION         = '2.3.0'.freeze
+  DEFAULT_KEYS    = %w[sku variant unit price_eur owner supplier article_number description].freeze
+  DEFAULT_DEC     = 2
+  MAX_DEPTH_HARD  = 50
+  THUMB_DIR       = File.join(Sketchup.temp_dir, 'elementaro_dev_thumbs').freeze
 
       @dlg          = nil
       @cache_rows   = nil        # Ergebnis des letzten Scans (Detailzeilen)
@@ -740,3 +742,4 @@
           .add_item('AutoInfo Dev (Panel)'){ ElementaroInfoDev.show_panel }
       end
     end
+# rubocop:enable all

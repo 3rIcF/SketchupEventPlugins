@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
+# Elementaro AutoInfo Dev namespace and utilities
 module ElementaroInfoDev
+  CHUNK_SIZE = 3000 unless const_defined?(:CHUNK_SIZE)
+
   # Scanner traverses models in chunks and reports progress
   class Scanner
-    CHUNK_SIZE = 3000
-
     # Yields slices of entities along with progress percentage
     # @param model [Sketchup::Model] the model to scan
     # @yield [slice, percent] Gives a slice of entities and progress
