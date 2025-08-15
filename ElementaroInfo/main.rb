@@ -9,6 +9,7 @@
     require 'json'
     require 'csv'
     require 'fileutils'
+    require 'zip'
 
     module ElementaroInfo
       extend self
