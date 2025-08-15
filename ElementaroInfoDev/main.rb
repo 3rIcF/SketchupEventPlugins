@@ -440,6 +440,10 @@
         end
       end
 
+      def cancel_scan!
+        @cancel_scan = true
+      end
+
       def scan_with_cache(opts)
         opts = normalize_scan_opts(opts)
         if @cache_rows && @cache_opts == opts && !@model_dirty
