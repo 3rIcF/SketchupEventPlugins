@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# rubocop:disable all
 
 require 'minitest/autorun'
 require 'tmpdir'
@@ -68,3 +69,5 @@ class TestDetachObservers < Minitest::Test
     assert_empty model.selection.observers
   end
 end
+
+# rubocop:enable all

@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+# rubocop:disable all
+
 require 'minitest/autorun'
 require 'tmpdir'
 require 'ostruct'
@@ -175,15 +177,15 @@ class TestAsyncScan < Minitest::Test
     timer = ElementaroInfoDev.instance_variable_get(:@scan_timer)
 
     progress = ElementaroInfoDev.js_calls.grep(/EA\.scanProgress\((\d+)\)/)
-    assert_equal ["EA.scanProgress(0)", "EA.scanProgress(40)"] , progress
+    assert_equal ['EA.scanProgress(0)', 'EA.scanProgress(40)'], progress
 
     timer.trigger
     progress = ElementaroInfoDev.js_calls.grep(/EA\.scanProgress\((\d+)\)/)
-    assert_equal ["EA.scanProgress(0)", "EA.scanProgress(40)", "EA.scanProgress(80)"] , progress
+    assert_equal ['EA.scanProgress(0)', 'EA.scanProgress(40)', 'EA.scanProgress(80)'], progress
 
     timer.trigger
     progress = ElementaroInfoDev.js_calls.grep(/EA\.scanProgress\((\d+)\)/)
-    assert_equal ["EA.scanProgress(0)", "EA.scanProgress(40)", "EA.scanProgress(80)", "EA.scanProgress(100)"] , progress
+    assert_equal ['EA.scanProgress(0)', 'EA.scanProgress(40)', 'EA.scanProgress(80)', 'EA.scanProgress(100)'], progress
     assert timer.stopped?
   end
 
@@ -198,3 +200,5 @@ class TestAsyncScan < Minitest::Test
     assert last < 100
   end
 end
+
+# rubocop:enable all

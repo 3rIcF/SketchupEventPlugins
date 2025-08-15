@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module ElementaroInfoDev
   # Scanner traverses models in chunks and reports progress
   class Scanner
@@ -10,6 +11,7 @@ module ElementaroInfoDev
     def scan_model(model)
       ents = model.entities.to_a
       return enum_for(:scan_model, model) unless block_given?
+
       total = ents.length
       processed = 0
       ents.each_slice(CHUNK_SIZE) do |slice|
