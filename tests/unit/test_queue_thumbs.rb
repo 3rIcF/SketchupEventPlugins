@@ -21,7 +21,7 @@ class TestQueueThumbs < Minitest::Test
         end
       end
     end
-    assert_equal false, start_called, 'timer should not start for empty list'
-    assert_equal false, stop_called,  'timer should not stop for empty list'
+    refute start_called, 'timer should not start for empty list'
+    refute stop_called,  'timer should not stop for empty list'
   end
 end
