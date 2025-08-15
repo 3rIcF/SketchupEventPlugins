@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'minitest/autorun'
 require 'tmpdir'
 require 'ostruct'
@@ -15,6 +17,7 @@ module UI
 
     def trigger
       return if @stopped
+
       @block.call(self)
       @stopped = true unless @repeat
     end
@@ -49,19 +52,21 @@ module UI
   end
 
   class HtmlDialog
-    def initialize(*) ; end
-    def add_action_callback(*) ; end
-    def set_file(*) ; end
-    def set_html(*) ; end
-    def show ; end
-    def execute_script(*) ; end
+    # rubocop:disable Style/SingleLineMethods
+    def initialize(*); end
+    def add_action_callback(*); end
+    def set_file(*); end
+    def set_html(*); end
+    def show; end
+    def execute_script(*); end
     def visible?; false; end
     def close; end
+    # rubocop:enable Style/SingleLineMethods
   end
 end
 
 module Geom
-  Z_AXIS = [0, 0, 1]
+  Z_AXIS = [0, 0, 1].freeze
 end
 
 module Sketchup
@@ -157,8 +162,8 @@ end
 ElementaroInfo.define_singleton_method(:to_js) do |js|
   (self.js_calls ||= []) << js
 end
-ElementaroInfo.define_singleton_method(:send_rows) { |_rows| }
-ElementaroInfo.define_singleton_method(:send_defs_summary) { }
+ElementaroInfo.define_singleton_method(:send_rows) { |_rows| nil }
+ElementaroInfo.define_singleton_method(:send_defs_summary) { |_summary| nil }
 
 class TestAsyncScan < Minitest::Test
   def setup

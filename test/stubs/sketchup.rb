@@ -65,4 +65,3 @@ module Sketchup
     @active_model = Model.new
   end
 end
-
