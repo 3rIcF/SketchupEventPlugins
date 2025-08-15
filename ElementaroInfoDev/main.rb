@@ -49,8 +49,8 @@ module ElementaroInfoDev
 
   def attach_observers
     m = Sketchup.active_model
-    (@model_obs ||= ModelObs.new)
-    (@sel_obs   ||= SelObs.new)
+    @model_obs ||= ModelObs.new
+    @sel_obs   ||= SelObs.new
     begin
       m.add_observer(@model_obs)
     rescue StandardError
@@ -421,12 +421,12 @@ module ElementaroInfoDev
     {
       'selection_only' => !opts['selection_only'].nil?,
       'include_hidden' => !opts['include_hidden'].nil?,
-      'only_types' => (opts['only_types'] || 'both'),
+      'only_types' => opts['only_types'] || 'both',
       'only_visible_tags' => !opts['only_visible_tags'].nil?,
-      'max_depth' => [[(opts['max_depth'] || 20).to_i, 0].max, MAX_DEPTH_HARD].min,
+      'max_depth' => (opts['max_depth'] || 20).to_i.clamp(0, MAX_DEPTH_HARD),
       'attr_keys' => (opts['attr_keys'] || DEFAULT_KEYS).map { |k| k.to_s.strip }.reject(&:empty?),
       'decimals' => (opts['decimals'] || DEFAULT_DEC).to_i.clamp(0, 6),
-      'count_mode' => (opts['count_mode'] || 'instances')
+      'count_mode' => opts['count_mode'] || 'instances'
     }
   end
 
@@ -500,7 +500,7 @@ module ElementaroInfoDev
 
         attrs = defn ? read_attrs(defn) : {}
         attrs.merge!(read_attrs(e))
-        picked = pick(attrs, (opts['attr_keys'] || []))
+        picked = pick(attrs, opts['attr_keys'] || [])
         price  = (picked['price_eur'] || 0).to_f
 
         rows << {
@@ -623,7 +623,7 @@ module ElementaroInfoDev
 
       attrs = defn ? read_attrs(defn) : {}
       attrs.merge!(read_attrs(e))
-      picked = pick(attrs, (opts['attr_keys'] || []))
+      picked = pick(attrs, opts['attr_keys'] || [])
       price  = (picked['price_eur'] || 0).to_f
 
       rows << {
