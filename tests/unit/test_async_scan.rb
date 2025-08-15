@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'minitest/autorun'
 require 'tmpdir'
 require 'ostruct'
@@ -148,7 +149,8 @@ class MockEntity < Sketchup::ComponentInstance
   end
 end
 
-require_relative '../../ElementaroInfo/main'
+require_relative '../../ElementaroInfoDev/main'
+ElementaroInfo = ElementaroInfoDev
 
 ElementaroInfo.singleton_class.class_eval do
   attr_accessor :js_calls
@@ -159,6 +161,7 @@ ElementaroInfo.define_singleton_method(:to_js) do |js|
 end
 ElementaroInfo.define_singleton_method(:send_rows) { |_rows| }
 ElementaroInfo.define_singleton_method(:send_defs_summary) { }
+ElementaroInfo.define_singleton_method(:cancel_scan!) { @scan_timer&.stop }
 
 class TestAsyncScan < Minitest::Test
   def setup

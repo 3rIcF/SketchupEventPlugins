@@ -48,7 +48,9 @@ module UI
     Menu.new
   end
 end
-require_relative '../../ElementaroInfo/main'
+require_relative '../../ElementaroInfoDev/main'
+ElementaroInfo = ElementaroInfoDev
+module Sketchup; def self.reset; @active_model = Model.new; end; end
 
 class TestDetachObservers < Minitest::Test
   def setup

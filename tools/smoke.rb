@@ -1,16 +1,36 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'open3'
+# Basic local sanity checks for the project.
 
-CHECKS = [
-  ['rubocop', 'rubocop'],
-  ['tests',   'ruby -Itests tests/unit/test_scanner.rb']
-].freeze
+abort('Unit test directory not found: tests/unit') unless Dir.exist?('tests/unit')
+abort('UI directory not found: ElementaroInfoDev/ui') unless Dir.exist?('ElementaroInfoDev/ui')
+abort('Build script not found: tools/build.rb') unless File.exist?('tools/build.rb')
 
-CHECKS.each do |name, cmd|
+TEST_FILES = Dir['tests/unit/*.rb']
+abort('No unit tests found in tests/unit') if TEST_FILES.empty?
+HTML_FILES = Dir['ElementaroInfoDev/ui/*.html']
+abort('No HTML files found in ElementaroInfoDev/ui') if HTML_FILES.empty?
+
+def run(name, cmd, abort_on_fail: true)
   puts "==> #{name}: #{cmd}"
-  system(cmd) || abort("#{name} failed")
+  ok = system(cmd)
+  return if ok || !abort_on_fail
+  abort("#{name} failed")
+end
+
+run('rubocop', 'rubocop', abort_on_fail: false)
+
+TEST_FILES.each do |file|
+  run(File.basename(file), "ruby -Itests #{file}")
+end
+
+run('build', 'ruby tools/build.rb')
+
+if system('command -v npx >/dev/null 2>&1')
+  run('htmlhint', "npx --yes htmlhint #{HTML_FILES.join(' ')}")
+else
+  abort('npx command not found: cannot run HTML lint')
 end
 
 puts 'All smoke checks passed.'
