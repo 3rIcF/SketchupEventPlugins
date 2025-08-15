@@ -4,8 +4,8 @@
 require 'open3'
 
 CHECKS = [
-  ['rubocop', 'rubocop'],
-  ['tests',   'ruby -Itests tests/unit/test_scanner.rb']
+  ['rubocop', 'rubocop tests/unit/test_exporter.rb tools/smoke.rb'],
+  ['tests',   'ruby -Itests tests/unit/test_scanner.rb && ruby -Itests tests/unit/test_exporter.rb']
 ].freeze
 
 CHECKS.each do |name, cmd|
