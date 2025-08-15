@@ -12,4 +12,5 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.1'
-      - run: ruby -Itest test/test_elementaro_autoinfo.rb
+      - run: ruby -Itest test/test_elementaro_autoinfo_dev.rb
+      - run: ruby -Itests tests/unit/test_scanner.rb && ruby -Itests tests/unit/test_exporter.rb
