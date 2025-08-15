@@ -41,6 +41,7 @@ module UI
     def add_submenu(_name)
       self
     end
+
     def add_item(_name); end
   end
 
@@ -68,4 +69,3 @@ class TestDetachObservers < Minitest::Test
     assert_empty model.selection.observers
   end
 end
-

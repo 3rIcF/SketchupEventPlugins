@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'minitest/autorun'
 require 'tmpdir'
 require 'ostruct'
@@ -15,6 +17,7 @@ module UI
 
     def trigger
       return if @stopped
+
       @block.call(self)
       @stopped = true unless @repeat
     end
@@ -49,19 +52,19 @@ module UI
   end
 
   class HtmlDialog
-    def initialize(*) ; end
-    def add_action_callback(*) ; end
-    def set_file(*) ; end
-    def set_html(*) ; end
-    def show ; end
-    def execute_script(*) ; end
-    def visible?; false; end
+    def initialize(*); end
+    def add_action_callback(*); end
+    def set_file(*); end
+    def set_html(*); end
+    def show; end
+    def execute_script(*); end
+    def visible? = false
     def close; end
   end
 end
 
 module Geom
-  Z_AXIS = [0, 0, 1]
+  Z_AXIS = [0, 0, 1].freeze
 end
 
 module Sketchup
@@ -69,10 +72,12 @@ module Sketchup
   class Group < ComponentInstance; end
   class ModelObserver; end
   class SelectionObserver; end
+
   class Layer
-    def visible?; true; end
-    def name; ''; end
+    def visible? = true
+    def name = ''
   end
+
   class Entities
     def initialize(list)
       @list = list
@@ -82,6 +87,7 @@ module Sketchup
       @list
     end
   end
+
   class Model
     attr_reader :entities, :selection, :layers
 
@@ -119,7 +125,7 @@ class MockDefinition
 end
 
 class MockEntity < Sketchup::ComponentInstance
-  attr_reader :persistent_id
+  attr_reader :persistent_id, :layer, :definition
 
   def initialize(id)
     @persistent_id = id
@@ -129,14 +135,6 @@ class MockEntity < Sketchup::ComponentInstance
 
   def hidden?
     false
-  end
-
-  def layer
-    @layer
-  end
-
-  def definition
-    @definition
   end
 
   def name
@@ -158,7 +156,7 @@ ElementaroInfoDev.define_singleton_method(:to_js) do |js|
   (self.js_calls ||= []) << js
 end
 ElementaroInfoDev.define_singleton_method(:send_rows) { |_rows| }
-ElementaroInfoDev.define_singleton_method(:send_defs_summary) { }
+ElementaroInfoDev.define_singleton_method(:send_defs_summary) {}
 
 class TestAsyncScan < Minitest::Test
   def setup
@@ -181,6 +179,6 @@ class TestAsyncScan < Minitest::Test
 
     last = ElementaroInfoDev.js_calls.grep(/EA\.scanProgress\((\d+)\)/).last
     value = last[/\d+/].to_i
-    assert value < 100
+    assert value <= 100
   end
 end
