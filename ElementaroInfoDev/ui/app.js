@@ -57,6 +57,16 @@
 
     const $ = sel => document.querySelector(sel);
 
+    const panel = $('.ea-panel');
+    const btnToggleSide = $('#btnToggleSide');
+    function applySideCollapse(){
+      if(window.innerWidth < 1100){ panel.classList.add('ea-panel--side-collapsed'); }
+      else{ panel.classList.remove('ea-panel--side-collapsed'); }
+    }
+    if(btnToggleSide){ btnToggleSide.onclick = ()=> panel.classList.toggle('ea-panel--side-collapsed'); }
+    window.addEventListener('resize', applySideCollapse);
+    applySideCollapse();
+
     function buildHeader(){
       const tr = $('#thead'); tr.innerHTML='';
       COLS.forEach(([key,label])=>{
