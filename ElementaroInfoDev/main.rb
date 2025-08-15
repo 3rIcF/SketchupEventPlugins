@@ -343,6 +343,10 @@
         }
       end
 
+      def cancel_scan!
+        @cancel_scan = true
+      end
+
       def scan_async(opts)
         opts = normalize_scan_opts(opts)
         @scan_timer&.stop rescue nil
