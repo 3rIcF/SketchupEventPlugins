@@ -1,17 +1,19 @@
-    # Elementaro AutoInfo v2.3.0 — performance & UX
-    # - Iterativer Scan (kein Rekursionslimit)
-    # - Scan-/Filter-Cache
-    # - Katalog-Ansicht (alle Definitionen)
-    # - Thumbs: Queue + Cache
-    # - UI aus separaten Dateien (ui/index.html, app.js, styles.css)
+# frozen_string_literal: true
 
-    require 'sketchup.rb'
-    require 'json'
-    require 'csv'
-    require 'fileutils'
+# Elementaro AutoInfo v2.3.0 — performance & UX
+# - Iterativer Scan (kein Rekursionslimit)
+# - Scan-/Filter-Cache
+# - Katalog-Ansicht (alle Definitionen)
+# - Thumbs: Queue + Cache
+# - UI aus separaten Dateien (ui/index.html, app.js, styles.css)
 
-    module ElementaroInfo
-      extend self
+require 'sketchup.rb'
+require 'json'
+require 'csv'
+require 'fileutils'
+
+module ElementaroInfo
+  extend self
 
       VERSION         = '2.3.0'.freeze
       DEFAULT_KEYS    = %w[sku variant unit price_eur owner supplier article_number description].freeze
@@ -226,15 +228,16 @@
 
       def queue_thumbs(def_names, only_missing:)
         list = def_names.uniq.compact
-        list.select!{|n| Sketchup.active_model.definitions[n] rescue false}
-        list.select!{|n| thumb_path(n).empty? } if only_missing
-        total = list.length; done = 0
-        return to_js('EA.toast("Keine offenen Thumbnails")') if total == 0
+        list.select! { |n| Sketchup.active_model.definitions[n] rescue false }
+        list.select! { |n| thumb_path(n).empty? } if only_missing
+        total = list.length
+        done  = 0
+        return to_js('EA.toast("Keine offenen Thumbnails")') if total.zero?
 
         to_js('EA.toast("Starte Thumbnail-Queue …")')
         to_js('EA.thumbProgress(0)')
         batch = 3
-        UI.start_timer(0.03, true) do |timer|
+        timer_id = UI.start_timer(0.03, true) do
           begin
             processed = 0
             while processed < batch && !list.empty?
@@ -244,18 +247,19 @@
               rescue => ex
                 warn "[EA] thumb error #{n}: #{ex.message}"
               end
-              done += 1; processed += 1
+              done += 1
+              processed += 1
             end
-            prog = ((done.to_f/total)*100).round
+            prog = ((done.to_f / total) * 100).round
             to_js("EA.thumbProgress(#{prog})")
             if list.empty?
-              timer.stop
+              UI.stop_timer(timer_id)
               send_rows(@cache_rows) # aktualisiere Thumb-URIs
               to_js('EA.thumbsReady()')
             end
           rescue => ex
             warn "[EA] queue timer err: #{ex.message}"
-            timer.stop rescue nil
+            UI.stop_timer(timer_id) rescue nil
             to_js('EA.thumbsReady()')
           end
         end
@@ -597,4 +601,4 @@
           .add_submenu('Elementaro')
           .add_item('AutoInfo (Panel)'){ ElementaroInfo.show_panel }
       end
-    end
+end
