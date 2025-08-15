@@ -14,7 +14,6 @@ end
 TARGET  = File.join(DIST, "elementaro_autoinfo_dev-v#{VERSION}.rbz")
 SOURCES = %w[elementaro_autoinfo_dev.rb ElementaroInfoDev README.md].freeze
 
-FileUtils.rm_rf(DIST)
 FileUtils.mkdir_p(DIST)
 
 Dir.chdir(ROOT) do
