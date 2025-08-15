@@ -13,7 +13,7 @@
     module ElementaroInfoDev
       extend self
 
-      VERSION         = '2.3.0'.freeze
+      VERSION         = '2.3.1'.freeze
       DEFAULT_KEYS    = %w[sku variant unit price_eur owner supplier article_number description].freeze
       DEFAULT_DEC     = 2
       MAX_DEPTH_HARD  = 50
@@ -99,6 +99,8 @@
         @dlg.add_action_callback('exportCsv'){ |_c, rows| export_rows(rows, :csv) }
         @dlg.add_action_callback('exportJson'){ |_c, rows| export_rows(rows, :json) }
         @dlg.add_action_callback('exportZip'){ |_c, rows| export_rows(rows, :zip) }
+        @dlg.add_action_callback('exportExcel'){ |_c, rows| export_excel(rows) }
+        @dlg.add_action_callback('importExcel'){ |_c,_| import_excel }
 
         # Thumbnails
         @dlg.add_action_callback('thumbsMissing'){ |_c, defs| queue_thumbs(parse_defs(defs), only_missing: true) }
@@ -197,6 +199,30 @@
         end
       rescue => ex
         UI.messagebox("Export fehlgeschlagen:\\n#{ex.class}: #{ex.message}")
+      end
+
+      def export_excel(rows_json)
+        rows = JSON.parse(rows_json.to_s, symbolize_names: true) rescue []
+        path = UI.savepanel('Export Excel (CSV)', default_export_dir, default_filename('csv'))
+        return unless path
+        write_csv(path, rows)
+        toast("Excel exportiert: #{File.basename(path)}")
+      rescue => ex
+        UI.messagebox("Export fehlgeschlagen:\n#{ex.class}: #{ex.message}")
+      end
+
+      def import_excel
+        path = UI.openpanel('Excel importieren (CSV)', default_export_dir, 'CSV|*.csv||')
+        return unless path
+        CSV.foreach(path, headers: true, col_sep: ';', encoding: 'bom|utf-8') do |row|
+          pid = row['pid'].to_i
+          attrs = DEFAULT_KEYS.map { |k| [k, row[k]] }.to_h.reject { |_k, v| v.nil? }
+          next if attrs.empty?
+          set_instance_attrs(pid, attrs)
+        end
+        toast('Excel importiert')
+      rescue => ex
+        UI.messagebox("Import fehlgeschlagen:\n#{ex.class}: #{ex.message}")
       end
 
       def default_export_dir

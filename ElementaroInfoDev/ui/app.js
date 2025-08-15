@@ -170,6 +170,8 @@
     $('#btnExportCsv').onclick  = ()=> SUI.exportCsv  && SUI.exportCsv(JSON.stringify(currentVisibleRows()));
     $('#btnExportJson').onclick = ()=> SUI.exportJson && SUI.exportJson(JSON.stringify(currentVisibleRows()));
     $('#btnExportZip').onclick  = ()=> SUI.exportZip  && SUI.exportZip(JSON.stringify(currentVisibleRows()));
+    $('#btnExportXlsx').onclick = ()=> SUI.exportExcel && SUI.exportExcel(JSON.stringify(currentVisibleRows()));
+    $('#btnImportXlsx').onclick = ()=> SUI.importExcel && SUI.importExcel();
 
     $('#btnCollapseAll').onclick = ()=>{ expanded=new Set(); render(); };
     $('#btnExpandAll').onclick   = ()=>{ expanded=new Set(allRows.map(r=>r.path)); render(); };
