@@ -6,16 +6,18 @@ require 'tmpdir'
 $LOAD_PATH.unshift File.expand_path('../../test/stubs', __dir__)
 require 'sketchup'
 
-module UI
-  class HtmlDialog
+module UI # :nodoc:
+  class HtmlDialog # :nodoc:
     def initialize(**_opts)
       @visible = false
       @on_closed = nil
     end
 
     def add_action_callback(*); end
+    # rubocop:disable Naming/AccessorMethodName
     def set_file(_path); end
     def set_html(_html); end
+    # rubocop:enable Naming/AccessorMethodName
 
     def set_on_closed(&block)
       @on_closed = block
@@ -37,10 +39,11 @@ module UI
     end
   end
 
-  class Menu
+  class Menu # :nodoc:
     def add_submenu(_name)
       self
     end
+
     def add_item(_name); end
   end
 
@@ -50,6 +53,7 @@ module UI
 end
 require_relative '../../ElementaroInfoDev/main'
 
+# Tests that observers are detached once the panel closes.
 class TestDetachObservers < Minitest::Test
   def setup
     Sketchup.reset
@@ -68,4 +72,3 @@ class TestDetachObservers < Minitest::Test
     assert_empty model.selection.observers
   end
 end
-
