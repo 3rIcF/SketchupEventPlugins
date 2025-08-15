@@ -150,39 +150,40 @@ class MockEntity < Sketchup::ComponentInstance
 end
 
 require_relative '../../ElementaroInfoDev/main'
-ElementaroInfo = ElementaroInfoDev
 
-ElementaroInfo.singleton_class.class_eval do
+ElementaroInfoDev.singleton_class.class_eval do
   attr_accessor :js_calls
 end
 
-ElementaroInfo.define_singleton_method(:to_js) do |js|
+ElementaroInfoDev.define_singleton_method(:to_js) do |js|
   (self.js_calls ||= []) << js
 end
-ElementaroInfo.define_singleton_method(:send_rows) { |_rows| }
-ElementaroInfo.define_singleton_method(:send_defs_summary) { }
-ElementaroInfo.define_singleton_method(:cancel_scan!) { @scan_timer&.stop }
+ElementaroInfoDev.define_singleton_method(:send_rows) { |_rows| }
+ElementaroInfoDev.define_singleton_method(:send_defs_summary) { }
+unless ElementaroInfoDev.respond_to?(:cancel_scan!)
+  ElementaroInfoDev.define_singleton_method(:cancel_scan!) { @scan_timer&.stop }
+end
 
 class TestAsyncScan < Minitest::Test
   def setup
-    ElementaroInfo.js_calls = []
-    ElementaroInfo.send(:remove_const, :CHUNK_SIZE)
-    ElementaroInfo.const_set(:CHUNK_SIZE, 2)
+    ElementaroInfoDev.js_calls = []
+    ElementaroInfoDev.send(:remove_const, :CHUNK_SIZE)
+    ElementaroInfoDev.const_set(:CHUNK_SIZE, 2)
     ents = (1..5).map { |i| MockEntity.new(i) }
     Sketchup.active_model = Sketchup::Model.new(ents)
   end
 
   def test_progress_and_cancel
-    ElementaroInfo.scan_async(ElementaroInfo.default_opts)
-    progress = ElementaroInfo.js_calls.grep(/EA\.scanProgress\((\d+)\)/)
+    ElementaroInfoDev.scan_async(ElementaroInfoDev.default_opts)
+    progress = ElementaroInfoDev.js_calls.grep(/EA\.scanProgress\((\d+)\)/)
     refute_empty progress
 
-    ElementaroInfo.cancel_scan!
-    timer = ElementaroInfo.instance_variable_get(:@scan_timer)
+    ElementaroInfoDev.cancel_scan!
+    timer = ElementaroInfoDev.instance_variable_get(:@scan_timer)
     timer.trigger
     assert timer.stopped?
 
-    last = ElementaroInfo.js_calls.grep(/EA\.scanProgress\((\d+)\)/).last
+    last = ElementaroInfoDev.js_calls.grep(/EA\.scanProgress\((\d+)\)/).last
     value = last[/\d+/].to_i
     assert value < 100
   end
