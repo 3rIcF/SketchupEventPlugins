@@ -87,5 +87,17 @@ class TestScanner < Minitest::Test
     child_attrs = results.last[:attributes]['info']
     assert_equal 1, child_attrs['val']
   end
+
+  def test_scan_avoids_cycles
+    a = MockEntity.new('A')
+    b = MockEntity.new('B')
+    a.definition.entities.instance_variable_set(:@list, [b])
+    b.definition.entities.instance_variable_set(:@list, [a])
+    model = MockModel.new([a])
+
+    results = @scanner.scan_model(model)
+    names = results.map { |r| r[:entity].definition.name }
+    assert_equal %w[A B], names
+  end
 end
 # rubocop:enable Style/Documentation

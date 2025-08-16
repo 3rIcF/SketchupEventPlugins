@@ -1,21 +1,29 @@
 # frozen_string_literal: true
 
+require 'set'
+
 module ElementaroInfoDev
   # Simple depth-first traversal for SketchUp-like entity trees.
   # It yields each entity so callers can collect data without worrying
-  # about the hierarchy structure.
+  # about the hierarchy structure. Cyclical references are guarded so
+  # traversal terminates even for incorrectly linked models.
   class EntityTraverser
-    def traverse(model, &)
-      walk(model.entities.to_a, &)
+    def traverse(model, &block)
+      walk(model.entities.to_a, Set.new, &block)
     end
 
     private
 
-    def walk(entities, &)
+    def walk(entities, visited, &block)
       entities.each do |entity|
+        oid = entity.object_id
+        next if visited.include?(oid)
+
+        visited.add(oid)
         yield entity
+
         children = child_entities(entity)
-        walk(children, &) unless children.empty?
+        walk(children, visited, &block) unless children.empty?
       end
     end
 
