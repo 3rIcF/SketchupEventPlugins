@@ -1,4 +1,4 @@
-    # Elementaro AutoInfo Dev v2.3.0 — performance & UX
+    # Elementaro AutoInfo Dev v2.3.1 — performance & UX
     # - Iterativer Scan (kein Rekursionslimit)
     # - Scan-/Filter-Cache
     # - Katalog-Ansicht (alle Definitionen)

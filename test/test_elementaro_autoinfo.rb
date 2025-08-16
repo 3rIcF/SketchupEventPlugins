@@ -3,7 +3,7 @@ $LOAD_PATH.unshift File.expand_path('stubs', __dir__)
 require 'sketchup'
 require 'extensions'
 
-class ElementaroAutoinfoDevTest < Minitest::Test
+class ElementaroAutoinfoTest < Minitest::Test
   def setup
     Sketchup.clear_extensions
   end
@@ -13,7 +13,7 @@ class ElementaroAutoinfoDevTest < Minitest::Test
     assert_equal 1, Sketchup.extensions.length
     ext = Sketchup.extensions.first
     assert_equal 'Elementaro AutoInfo Dev', ext.name
-    assert_equal '2.3.0', ext.version
+    assert_equal '2.3.1', ext.version
     assert_equal 'Elementaro', ext.creator
   end
 end
