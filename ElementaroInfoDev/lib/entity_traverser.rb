@@ -8,8 +8,8 @@ module ElementaroInfoDev
   # about the hierarchy structure. Cyclical references are guarded so
   # traversal terminates even for incorrectly linked models.
   class EntityTraverser
-    def traverse(model, &block)
-      walk(model.entities.to_a, Set.new, &block)
+    def traverse(model, &)
+      walk(model.entities.to_a, Set.new, &)
     end
 
     private

@@ -13,7 +13,6 @@ module ElementaroInfoDev
     # Exports scanner results to an XLSX file.
     # @param results [Array<Hash>] data from Scanner#scan_model
     # @param path [String] destination path for the xlsx file
-    # rubocop:disable Metrics/AbcSize
     def export(results, path)
       workbook = RubyXL::Workbook.new
       worksheet = workbook[0]
@@ -34,12 +33,10 @@ module ElementaroInfoDev
       end
       workbook.write(path)
     end
-    # rubocop:enable Metrics/AbcSize
 
     # Imports an XLSX file and returns attribute data.
     # @param path [String] source xlsx file path
     # @return [Hash{Integer=>Hash}]
-    # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
     def import(path)
       workbook = RubyXL::Parser.parse(path)
       worksheet = workbook[0]
@@ -60,7 +57,6 @@ module ElementaroInfoDev
       end
       data
     end
-    # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
     # Applies imported attribute data to entities in the model.
     # @param model [Object] model responding to `entities`
