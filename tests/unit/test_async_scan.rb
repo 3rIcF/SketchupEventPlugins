@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+# rubocop:disable Style/Documentation, Lint/EmptyClass
+
 require 'minitest/autorun'
 require 'tmpdir'
 require 'ostruct'
@@ -15,6 +19,7 @@ module UI
 
     def trigger
       return if @stopped
+
       @block.call(self)
       @stopped = true unless @repeat
     end
@@ -29,9 +34,7 @@ module UI
   end
 
   def self.start_timer(_interval, repeat, &block)
-    timer = TimerStub.new(repeat, block)
-    timer.trigger
-    timer
+    TimerStub.new(repeat, block)
   end
 
   class MenuStub
@@ -49,19 +52,19 @@ module UI
   end
 
   class HtmlDialog
-    def initialize(*) ; end
-    def add_action_callback(*) ; end
-    def set_file(*) ; end
-    def set_html(*) ; end
-    def show ; end
-    def execute_script(*) ; end
-    def visible?; false; end
+    def initialize(*); end
+    def add_action_callback(*); end
+    def set_file(*); end
+    def set_html(*); end
+    def show; end
+    def execute_script(*); end
+    def visible? = false
     def close; end
   end
 end
 
 module Geom
-  Z_AXIS = [0, 0, 1]
+  Z_AXIS = [0, 0, 1].freeze
 end
 
 module Sketchup
@@ -69,10 +72,12 @@ module Sketchup
   class Group < ComponentInstance; end
   class ModelObserver; end
   class SelectionObserver; end
+
   class Layer
-    def visible?; true; end
-    def name; ''; end
+    def visible? = true
+    def name = ''
   end
+
   class Entities
     def initialize(list)
       @list = list
@@ -82,6 +87,7 @@ module Sketchup
       @list
     end
   end
+
   class Model
     attr_reader :entities, :selection, :layers
 
@@ -119,9 +125,10 @@ class MockDefinition
 end
 
 class MockEntity < Sketchup::ComponentInstance
-  attr_reader :persistent_id
+  attr_reader :persistent_id, :layer, :definition
 
   def initialize(id)
+    super()
     @persistent_id = id
     @definition = MockDefinition.new("Def#{id}")
     @layer = Sketchup::Layer.new
@@ -129,14 +136,6 @@ class MockEntity < Sketchup::ComponentInstance
 
   def hidden?
     false
-  end
-
-  def layer
-    @layer
-  end
-
-  def definition
-    @definition
   end
 
   def name
@@ -157,14 +156,13 @@ end
 ElementaroInfoDev.define_singleton_method(:to_js) do |js|
   (self.js_calls ||= []) << js
 end
-ElementaroInfoDev.define_singleton_method(:send_rows) { |_rows| }
-ElementaroInfoDev.define_singleton_method(:send_defs_summary) { }
+ElementaroInfoDev.define_singleton_method(:send_rows) { |_rows| nil }
+ElementaroInfoDev.define_singleton_method(:send_defs_summary) { nil }
 
 class TestAsyncScan < Minitest::Test
   def setup
     ElementaroInfoDev.js_calls = []
-    ElementaroInfoDev.send(:remove_const, :CHUNK_SIZE)
-    ElementaroInfoDev.const_set(:CHUNK_SIZE, 2)
+    ElementaroInfoDev.instance_variable_set(:@chunk_size, 2)
     ents = (1..5).map { |i| MockEntity.new(i) }
     Sketchup.active_model = Sketchup::Model.new(ents)
   end
@@ -184,3 +182,5 @@ class TestAsyncScan < Minitest::Test
     assert value < 100
   end
 end
+
+# rubocop:enable Style/Documentation, Lint/EmptyClass
