@@ -2,10 +2,12 @@
 
 require 'tmpdir'
 
+# Teststubs für SketchUp-API.
 module Sketchup
   @extensions = []
 
-  def self.register_extension(ext, _load = true)
+  # Registriert eine Erweiterung in der Testumgebung.
+  def self.register_extension(ext, _load = true) # rubocop:disable Style/OptionalBooleanParameter
     @extensions << ext
   end
 
@@ -50,8 +52,10 @@ module Sketchup
     end
   end
 
+  # rubocop:disable Lint/EmptyClass
   class ModelObserver; end
   class SelectionObserver; end
+  # rubocop:enable Lint/EmptyClass
 
   def self.active_model
     @active_model ||= Model.new
@@ -65,4 +69,3 @@ module Sketchup
     @active_model = Model.new
   end
 end
-

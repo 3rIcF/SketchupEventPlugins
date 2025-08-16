@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'minitest/autorun'
 $LOAD_PATH.unshift File.expand_path('stubs', __dir__)
 require 'sketchup'
@@ -13,7 +15,7 @@ class ElementaroAutoinfoDevTest < Minitest::Test
     assert_equal 1, Sketchup.extensions.length
     ext = Sketchup.extensions.first
     assert_equal 'Elementaro AutoInfo Dev', ext.name
-    assert_equal '2.3.0', ext.version
+    assert_equal '2.3.1', ext.version
     assert_equal 'Elementaro', ext.creator
   end
 end

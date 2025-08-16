@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class SketchupExtension
   attr_reader :name, :path
   attr_accessor :description, :version, :creator
