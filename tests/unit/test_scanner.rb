@@ -44,12 +44,14 @@ class MockEntity
 end
 
 class MockEntities
+  include Enumerable
+
   def initialize(list)
     @list = list
   end
 
-  def to_a
-    @list
+  def each(&block)
+    @list.each(&block)
   end
 end
 
