@@ -1,9 +1,11 @@
-require 'sketchup.rb'
-require 'extensions.rb'
+# frozen_string_literal: true
+
+require 'sketchup'
+require 'extensions'
 
 ext = SketchupExtension.new('Elementaro AutoInfo Dev', 'ElementaroInfoDev/main')
 ext.description = 'AutoInfo/BOM: Liste, Karten/Library, Katalog, Filter-Cache, Thumbnails'
-ext.version     = '2.3.0'
+ext.version     = '2.3.2'
 ext.creator     = 'Elementaro'
 
 Sketchup.register_extension(ext, true)
