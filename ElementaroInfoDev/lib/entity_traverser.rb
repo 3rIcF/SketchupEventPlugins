@@ -9,7 +9,7 @@ module ElementaroInfoDev
   # traversal terminates even for incorrectly linked models.
   class EntityTraverser
     def traverse(model, &)
-      walk(model.entities.to_a, Set.new, &)
+      walk(model.entities, Set.new, &)
     end
 
     private
@@ -21,19 +21,16 @@ module ElementaroInfoDev
 
         visited.add(oid)
         yield entity
-
         children = child_entities(entity)
-        walk(children, visited, &block) unless children.empty?
+        walk(children, visited, &block) if children
       end
     end
 
     def child_entities(entity)
       if entity.respond_to?(:definition) && entity.definition.respond_to?(:entities)
-        entity.definition.entities.to_a
+        entity.definition.entities
       elsif entity.respond_to?(:entities)
-        entity.entities.to_a
-      else
-        []
+        entity.entities
       end
     end
   end
