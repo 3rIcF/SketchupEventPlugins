@@ -11,7 +11,6 @@ require 'sketchup'
 require 'json'
 require 'csv'
 require 'fileutils'
-require 'set'
 
 # Hauptmodul der Elementaro-AutoInfo-Dev-Erweiterung.
 # rubocop:disable Metrics/ModuleLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity, Metrics/BlockLength
