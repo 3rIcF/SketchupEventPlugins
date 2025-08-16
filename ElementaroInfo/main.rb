@@ -244,8 +244,8 @@ module ElementaroInfo
               n = list.shift
               begin
                 ensure_thumb_for(n)
-              rescue => ex
-                warn "[EA] thumb error #{n}: #{ex.message}"
+              rescue => e
+                warn "[EA] thumb error #{n}: #{e.message}"
               end
               done += 1
               processed += 1
@@ -257,8 +257,8 @@ module ElementaroInfo
               send_rows(@cache_rows) # aktualisiere Thumb-URIs
               to_js('EA.thumbsReady()')
             end
-          rescue => ex
-            warn "[EA] queue timer err: #{ex.message}"
+          rescue => e
+            warn "[EA] queue timer err: #{e.message}"
             UI.stop_timer(timer_id) rescue nil
             to_js('EA.thumbsReady()')
           end
