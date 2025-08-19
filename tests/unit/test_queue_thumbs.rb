@@ -19,7 +19,7 @@ module UI
     def trigger
       return if @stopped
 
-      @block.call(self)
+      @block.call
       @stopped = true unless @repeat
     end
 
@@ -34,6 +34,10 @@ module UI
 
   def self.start_timer(_interval, repeat, &block)
     TimerStub.new(repeat, block)
+  end
+
+  def self.stop_timer(timer)
+    timer.stop if timer
   end
 
   class MenuStub
