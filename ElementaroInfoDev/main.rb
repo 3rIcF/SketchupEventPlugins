@@ -20,7 +20,7 @@ require 'set'
 module ElementaroInfoDev
   module_function
 
-  VERSION         = '2.3.2'
+  VERSION         = '2.3.4'
   DEFAULT_KEYS    = %w[sku variant unit price_eur owner supplier article_number description].freeze
   DEFAULT_DEC     = 2
   MAX_DEPTH_HARD  = 50
@@ -347,12 +347,12 @@ module ElementaroInfoDev
     done = 0
     return to_js('EA.toast("Keine offenen Thumbnails")') if total.zero?
 
-    @thumb_timer&.stop
+    UI.stop_timer(@thumb_timer) if @thumb_timer
 
     to_js('EA.toast("Starte Thumbnail-Queue …")')
     to_js('EA.thumbProgress(0)')
     batch = 3
-    @thumb_timer = UI.start_timer(0.03, true) do |timer|
+    @thumb_timer = UI.start_timer(0.03, true) do
       processed = 0
       while processed < batch && !list.empty?
         n = list.shift
@@ -367,18 +367,14 @@ module ElementaroInfoDev
       prog = ((done.to_f / total) * 100).round
       to_js("EA.thumbProgress(#{prog})")
       if list.empty?
-        timer.stop
+        UI.stop_timer(@thumb_timer)
         @thumb_timer = nil
         send_rows(@cache_rows) # aktualisiere Thumb-URIs
         to_js('EA.thumbsReady()')
       end
     rescue StandardError => e
       warn "[EA] queue timer err: #{e.message}"
-      begin
-        timer.stop
-      rescue StandardError
-        nil
-      end
+      UI.stop_timer(@thumb_timer)
       @thumb_timer = nil
       to_js('EA.thumbsReady()')
     end
@@ -446,7 +442,7 @@ module ElementaroInfoDev
   def scan_async(opts)
     opts = normalize_scan_opts(opts)
     begin
-      @scan_timer&.stop
+      UI.stop_timer(@scan_timer) if @scan_timer
     rescue StandardError
       nil
     end
@@ -459,7 +455,7 @@ module ElementaroInfoDev
     stack   = base.reverse.map { |e| [e, [], 0] }
     processed = 0
     to_js('EA.scanProgress(0)')
-    @scan_timer = UI.start_timer(0.03, true) do |timer|
+    @scan_timer = UI.start_timer(0.03, true) do
       cnt = 0
       while cnt < CHUNK_SIZE && !stack.empty? && !@cancel_scan
         e, chain, depth = stack.pop
@@ -542,7 +538,8 @@ module ElementaroInfoDev
       prog = total.zero? ? 100 : ((processed.to_f / total) * 100).round
       to_js("EA.scanProgress(#{prog})")
       if stack.empty? || @cancel_scan
-        timer.stop
+        UI.stop_timer(@scan_timer)
+        @scan_timer = nil
         unless @cancel_scan
           finalize_scan(rows, opts)
           send_rows(@cache_rows)
@@ -551,16 +548,14 @@ module ElementaroInfoDev
       end
     rescue StandardError => e
       warn "[EA] scan timer err: #{e.message}"
-      begin
-        timer.stop
-      rescue StandardError
-        nil
-      end
+      UI.stop_timer(@scan_timer)
+      @scan_timer = nil
     end
   end
 
   def cancel_scan!
     @cancel_scan = true
+    UI.stop_timer(@scan_timer) if @scan_timer
     @scan_timer = nil
   end
 

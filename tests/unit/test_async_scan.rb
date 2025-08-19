@@ -15,7 +15,7 @@ module UI
 
     def trigger
       return if @stopped
-      @block.call(self)
+      @block.call
       @stopped = true unless @repeat
     end
 
@@ -29,9 +29,11 @@ module UI
   end
 
   def self.start_timer(_interval, repeat, &block)
-    timer = TimerStub.new(repeat, block)
-    timer.trigger
-    timer
+    TimerStub.new(repeat, block)
+  end
+
+  def self.stop_timer(timer)
+    timer.stop if timer
   end
 
   class MenuStub
@@ -171,12 +173,13 @@ class TestAsyncScan < Minitest::Test
 
   def test_progress_and_cancel
     ElementaroInfoDev.scan_async(ElementaroInfoDev.default_opts)
+    timer = ElementaroInfoDev.instance_variable_get(:@scan_timer)
+    timer.trigger
     progress = ElementaroInfoDev.js_calls.grep(/EA\.scanProgress\((\d+)\)/)
     refute_empty progress
 
     ElementaroInfoDev.cancel_scan!
-    timer = ElementaroInfoDev.instance_variable_get(:@scan_timer)
-    timer&.trigger
+    timer.trigger
 
     last = ElementaroInfoDev.js_calls.grep(/EA\.scanProgress\((\d+)\)/).last
     value = last[/\d+/].to_i
